@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Symfony2 on IBM i</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Symfony2 on IBM i">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, IBM i, Symfony2">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Symfony2 on IBM i</h1>
+    <p class="date">
+        IBM i, Symfony2 | December 02, 2012
+    </p>
+    <p>
+There is <a href="https://www.youtube.com/watch?v=GTB-8VqgsuE" target="_blank">a screencast on YouTube</a> for this post.
+</p>
+
+<p>
+It’s no secret that I’m a fan of the IBM i platform. It’s also no secret that I am a Symfony2 user. Today I combined these two and installed a Symfony2 project on IBM i.
+</p>
+
+<h2>Your IBM i</h2>
+
+<p>
+I don’t have access to a recent IBM i machine to play with. But IBM has a Virtual Loaner Program (VLP) where you can basically have access to your own LPAR. Downsides are that you have to become a PartnerWorld member (which takes a few days). Also, the time on your machine is limited to 14 days (per timeslot). And, you have to VPN into the IBM VLP network to access your machine. Not meant for public demo’s.
+</p>
+
+<p>
+On the other hand, PartnerWorld membership is completely free. And, you can automatically save your LPAR as an image on the VLP SAN. Later, you can request a new 14 day timeslot and start from the saved LPAR. Plus, you have access to the newest hardware (POWER 7) and software (IBM i 7.1).
+</p>
+
+<h2>Connection to VLP</h2>
+
+<p>
+The VLP provides good <a href="https://www-304.ibm.com/partnerworld/wps/static/pdf/Connecting_to_Your_VLP_System_A_User_Guide_V2.pdf" target="_blank">documentation</a> on how to set up the connection. As Linux user, I use the Cisco AnyConnect VPN client to access the VLP network. The VLP links to the installer of this client on the VPN access webpage. After installation, it’s a matter of running "<span class="terminal">/opt/cisco/anyconnect/bin/vpnui</span>" and entering your credentials.
+</p>
+
+<h2>IBM i access</h2>
+
+<p>
+As a Linux user, download and extract the <a href="http://sourceforge.net/projects/tn5250j/?source=dlp" target="_blank">tn5250j client</a>. Then run "<span class="terminal">java -jar tn5250j.jar</span>" to start the program.
+</p>
+
+<p>
+You can also just SSH into your machine with the <span class="terminal">QSECOFR</span> user. You will then be in the PASE environment. If you log in with SSH, you will have a crappy <span class="terminal">QSH</span> shell. We will solve this later.
+</p>
+
+<h2>PHP installation</h2>
+
+<p>
+As you will see in "<span class="terminal">GO LICPGM</span>" IBM enables Zend Server 5.0 on the VLP machines, this includes PHP. Unfortunately, it’s a little outdated. From the bash shell, run:
+</p>
+
+<p class="terminal"># /usr/local/ZendSvr/bin/php-cli -v
+PHP 5.2.11 (cli) (built: Jan  3 2010 15:53:33)</p>
+
+<p>
+Symfony2 requires at least 5.3.3. So we will install a new Zend Server 5.6 with PHP 5.3.8 our own. First just remove the old Zend Server with:
+</p>
+
+<p class="terminal">DLTLICPGM LICPGM(2ZSVRPI)</p>
+
+<p>
+Now, download Zend Server for IBM i from the Zend website and extact the zip file. Zend provides excellent instructions on how to install and use Zend Server for IBM i. They have <a href="http://www.zend.com/topics/documentation/server-ibm-i/Zend-Server-IBMi-5.6-Installation-Guide-011612.pdf" target="_blank">a PDF</a> on their website that covers Zend Server installation, MySQL installation and so on. Create a SAVF *FILE object on the server with "<span class="terminal">CRTSAVF QGPL/ZSVRSAVF</span>". Next FTP the file from your machine to the IBM i with the FTP command "<span class="terminal">put zsvrsavf.savf qgpl/zsvrsavf</span>". Don’t forget to use binary mode!
+</p>
+
+<p>
+Now, you can restore the licensed program with the command:
+</p>
+
+<p class="terminal">SBMJOB CMD(RSTLICPGM LICPGM(2ZSVRPI) DEV(*SAVF) SAVF(QGPL/ZSVRSAVF))</p>
+
+<p>
+Wait until the program is completely installed (job will display a message). Check with "<span class="terminal">GO LICPGM</span>" that the Zend Server licensed program is *INSTALLED.
+</p>
+
+<p>
+Now, go to "<span class="terminal">GO ZENDSVR/ZSMENU</span>" and start the Zend Server subsystem and the Apache processes. You will now have access to the webserver on port 10088. You can run the Zend demo applications there if you like.
+</p>
+
+<h2>MySQL</h2>
+
+<p>
+Above, we installed Zend Server non-interactively. This means that MySQL will not be installed. You can go to "<span class="terminal">GO ZENDSVR/ZSMENU</span>" and choose MySQL. You can then install MySQL too. Zend Server has PhpMyAdmin enabled, so if you install MySQL you can just use PMA to manage the installation.
+</p>
+
+<h2>Symfony2</h2>
+
+<p>
+In order to install Symfony2, you need Composer. Download the phar file on your machine and copy it to the IBM i (SCP or FTP).
+</p>
+
+<p>
+Symfony2 will need to download some dependencies from GitHub. This means that you will need Git. IBM i has a Portable Application Solutions Environment (PASE). This is basically an environment where you can install and run AIX binaries.
+</p>
+
+<p>
+The website of <a href="http://youngiprofessionals.com/wiki/index.php/PASE/OpenSourceBinaries" target="_blank">young i professionals</a> provides the AIX binaries "<span class="terminal">rpm</span>" (rpm.rte), "<span class="terminal">wget</span>" (wget-1.9.1-1.aix5.1.ppc.rpm) and a file "<span class="terminal">setup.sh</span>" to install these two.
+</p>
+
+<p>
+Then, you can download "<span class="terminal">wwwinstallgit.sh</span>" and install all kinds of other AIX binaries on your IBM i machine (this uses the previously installed rpm and wget). Install git with the command:
+</p>
+
+<p class="terminal">./wwwinstallgit.sh --package=git</p>
+
+<p>
+If you want more useful things, run:
+</p>
+
+<p class="terminal">./wwwinstallgit.sh --package=all</p>
+
+<p>
+For example, this installs bash so you can get out of your crappy QSH. Just run "<span class="terminal">bash</span>" to switch to good old bash.
+</p>
+
+<p>
+The document root of the webserver is at "/www/zendsvr/htdocs". Go there and run the commands:
+</p>
+
+<p class="terminal"># alias composer="/usr/local/ZendSvr/bin/php-cli /home/qsecofr/composer.phar"
+# composer create-project symfony/framework-standard-edition Symfony2 2.1.4</p>
+
+<p>
+You will now have a Symfony2 project running on your IBM i.
+</p>
+
+<p>
+I mounted the IBM i QOpenSys filesystem over SSH from my Linux machine and created some files with Sublime Text 2. I also generated an entity from the commandline on the IBM i and then run "<span class="terminal">app/console doctrine:schema:update</span>". All seems to work just fine.
+</p>
+
+<h2>Conclusion</h2>
+
+<p>
+It was fun doing this. But this post is not meant to be a real how-to. The instructions are too basic for that.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

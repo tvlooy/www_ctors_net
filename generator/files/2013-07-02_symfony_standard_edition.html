@@ -1,0 +1,203 @@
+<!--
+creation_date: 2013-07-02
+permalink: symfony_standard_edition
+title: Getting started with Symfony Standard Edition
+keywords: Symfony2
+-->
+<p>
+This article was published in <a href="http://webandphp.com/GettingstartedwithSymfonyStandardEdition" target="_blank">Web and PHP</a> magazine.
+</p>
+
+<h2>Getting started with Symfony Standard Edition</h2>
+
+<p>
+The first important thing to say about <a href="http://symfony.com/" target="_blank">Symfony</a> is that it’s not just another framework. Symfony is a project that tries to provide a sort of PHP middleware by developing a reusable set of standalone components. There is a lot to say about the Symfony2 components and the ecosystem around them. Over the last few years, big projects like Drupal, ezPublish, phpBB, Laravel and many more have started adopting these components to solve their common web development problems.
+</p>
+
+<p>
+Based on these components, Symfony2 can also be a full-stack web framework on its own. As you probably don't want to spend time installing and configuring components and devising a good directory structure yourself, Symfony2 came up with distributions: simple, easy-to-install and packaged solutions designed to meet specific user needs. A distribution is made up of Symfony2 components, a selection of bundles that build upon the components, and has a certain directory structure with a default configuration.
+</p>
+
+<p>
+For example, distributions are being built around content management, like the <a href="http://cmf.symfony.com/" target="_blank">Symfony CMF</a>, and e-commerce, like <a href="http://www.sylius.com/" target="_blank">Sylius</a> and <a href="http://vespolina.org/" target="_blank">Vespolina</a>. However, the recommended distribution when starting a new project is the Symfony Standard Edition, which contains the most common bundles and comes with a simple configuration system.
+</p>
+
+<h2>What’s inside the Standard Edition?</h2>
+
+<p>
+The fundamental principles of Symfony2 are centred around the HTTP specification. It is a Request/Response framework. If you think in Model-View-Controller (MVC) terms, Symfony2 is only providing the tools for the Controller and the View part, although tight integration does exist for popular object-relational mappers (ORM's). Hence, the Standard Edition comes with <a href="http://www.doctrine-project.org/" target="_blank">Doctrine2</a> for the Model part. Whether you want to exploit the full ORM or just keep yourself to the DBAL is up to you.
+</p>
+
+<p>
+Doctrine is plugged into Symfony via a bundle. Bundles are first class citizens in Symfony, by which I mean that in Symfony everything is a bundle. Even the core framework functionality is a bundle. When you start a new project, the first thing you will do is create a bundle to harbour your own custom code.
+</p>
+
+<p>
+Besides Symfony2 and Doctrine2, the Standard Edition comes with <a href="http://twig.sensiolabs.org/" target="_blank">Twig</a> as the only configured templating engine. It also comes with <a href="http://swiftmailer.org/" target="_blank">Swiftmailer</a> as a library for sending emails, uses <a href="http://github.com/Seldaek/monolog" target="_blank">Monolog</a> as a logging library, has <a href="http://github.com/kriswallsmith/assetic" target="_blank">Assetic</a> for asset processing, and has an excellent Profiler bundle that enables profiling functionality and a web debug toolbar.
+</p>
+
+<p>
+Mailing, logging, database access, and anything that accomplishes a specific task is a typical service. To make services available inside your application, Symfony2 uses a service container. The container standardizes and centralizes the way these services are constructed in an application. Through the service container, you will find yourself using these services very easily. The service container abstracts away how a service is constructed and configured for you.
+</p>
+
+<p>
+The Standard Edition also enables annotations for everything. It relies on Doctrine Common as a PHP annotation implementation. Since Doctrine ORM and DBAL also rely on Doctrine Common, this is rather convenient. For those that don't know annotations, they are just classes that allow you to extend the functionality of your code from within the doc block comments of your class files, on properties and methods. Code is annotated by adding metadata inside the doc blocs. This metadata will be used for configuration purposes. It is easy to use and allows you to define everything in the same file. If you don’t like this concept, you will be happy to hear that annotations are completely optional. Symfony2 is flexible enough to let you accomplish the same thing with XML, YAML, or even plain PHP. But, there are some very powerful annotations available that can make your life as a Symfony2 developer a lot easier.
+</p>
+
+<p>
+In versions prior to Symfony Standard Editon 2.3, the bundles JMSDiExtraBundle, JMSSecurityExtraBundle and JMSAopBundle enabled dependency injection, security configuration etc. with annotations. These bundles were dropped from the Standard Edition 2.3 because they are not MIT/BSD licensed. They are covered by the open-source Apache 2.0 license, which allows you to use them freely and they can be enabled again very easily. Since these bundles demonstrate the power and simplicity of annotations, let’s see some examples anyway.
+</p>
+
+<p>
+Example 1: defining a service with the @Service annotation.
+</p>
+
+<p class="terminal">use JMS\DiExtraBundle\Annotation\Service;
+use JMS\DiExtraBundle\Annotation\InjectParams;
+use JMS\DiExtraBundle\Annotation\Inject;
+
+/**
+ * @Service("some.service.id")
+ */
+class SomeService
+{
+    /**
+     * @InjectParams({"dependency" = @Inject("other.service.id")})
+     */
+    public function __construct($dependency)
+    {
+        // ...
+    }
+}</p>
+
+<p>
+This allows you to use the service by requesting it from the service container like so:
+</p>
+
+<p class="terminal">$container->get("some.service.id");</p>
+
+<p>
+Example 2: routing, templating and security.
+</p>
+
+<p class="terminal">use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route,
+    Sensio\Bundle\FrameworkExtraBundle\Configuration\Method,
+    Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use JMS\SecurityExtraBundle\Annotation\Secure;
+
+class BlogpostController
+{
+    /**
+     * @Route("/blogpost/create")
+     * @Method("post")
+     * @Template("AcmeDemoBundle:Blogpost:show.html.twig")
+     * @Secure(roles="ROLE_WRITER")
+     */
+    public function createAction()
+    {
+        // ...
+    }
+}</p>
+
+<p>
+When you submit a new blogpost, you have to use a POST method on /blogpost/create, and you have to be authenticated with a user who belongs to "ROLE_WRITER". The template that will be displayed on success is the Blogpost's show.html.twig template. This is just an example. The default template that would be used when we omit the @Template annotation would be create.html.twig.
+</p>
+
+<p>
+Symfony2 also has a very powerful Event Dispatcher component. This component basically implements the Observer pattern. You can hook into existing events, for example HTTP kernel events like “kernel.response” and “kernel.terminate”, or you can create events for your own application: for example a "blogpost.created" event, which you can extend later on.
+</p>
+
+<p>
+For working with user input, the Form component provides tools for defining HTML forms and rendering and mapping request data to related object models. It’s one of the most complex Symfony components, but a very powerful one when you learn to master it. Furthermore, the Form component integrates nicely with the Validation component, for validation of object models.
+</p>
+
+<p>
+The form component is also well integrated with Twig, for the rendering of forms. There is a lot to say about Twig. With features like template inheritance and automatic output escaping, it’s one of the most modern and flexible templating engines around. Like a lot of things in Symfony, Twig builds upon the experiences learned from other, even non-PHP, web development frameworks.
+</p>
+
+<p>
+Trying to cover every bundle included with the Symfony Standard Edition and explaining every aspect of it is far beyond the scope of this article. It might seem hard to get started with all of this. But, to make it all very easy for beginners, Symfony Standard Edition comes with an example project and a code generator bundle that helps you get started. Starting a project with Symfony Standard Edition is also very easy, just run the command:
+</p>
+
+<p class="terminal">php composer.phar create-project symfony/framework-standard-edition myproject 2.3.0</p>
+
+<h2>Hello Symfony!</h2>
+
+<p>
+After running the create-project command, you are ready to create a bundle for your own project:
+</p>
+
+<p class="terminal">php app/console generate:bundle --namespace=Wpm/HelloBundle --format=yml</p>
+
+<p>
+This command will create a bundle for you in src/Wpm/HelloBundle and generate your first controller in Controller/DefaultController.php of the bundle directory. The controller has an indexAction() method. In this example, I chose YAML as the default configuration format. But remember that this also works with XML, PHP or annotation. Because I chose YAML, the routes to the controller actions will be defined in the file Resources/config/routing.yml. A route /hello/{name} was already provided for the indexAction().
+</p>
+
+<p class="terminal">namespace Wpm\HelloBundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+class DefaultController extends Controller
+{
+    public function indexAction($name)
+    {
+        return $this->render(
+            'WpmHelloBundle:Default:index.html.twig',
+            array('name' => $name)
+        );
+    }
+}</p>
+
+<p>
+The {name} parameter in the route is passed as an argument to the controller action. After doing some work in the controller, for example fetching database records, a Twig template is rendered. In this case, the template Resources/views/Default/index.html.twig will be used.
+</p>
+
+<p>
+In the Twig file we can print the $name parameter that we passed to the render function. Twig has the ability to loop over arrays, has support for if then else constructions, and has filters for things like date formatting.
+</p>
+
+<p class="terminal">Hello {{ name }}!</p>
+
+<p>
+When pointing a browser to /hello/Symfony, the new WpmHelloBundle will print “Hello Symfony!”. This is a very basic example to give you an impression of how things work. The Symfony documentation builds upon this example and shows you a lot more that you can do.
+</p>
+
+<h2>Going further</h2>
+
+<p>
+Symfony2 dependencies are managed with <a href="http://getcomposer.org/" target="_blank">Composer</a>, the new PHP packaging system. Packages live inside a package repository. You can make Composer work with your own private repository, or just use the main Composer repository called <a href="http://www.packagist.org/" target="_blank">Packagist</a>. Packagist aggregates all sorts of PHP packages that are installable with Composer. These packages can be searched from Packagist. Packages can contain anything, and are definitely not limited to Symfony2. If you want to extend your Symfony2 project with specific functionality, chances are that someone already created a package for it that fits your needs.
+</p>
+
+<p>
+Most of Symfony2 specific bundles are also packaged for Composer and searchable on Packagist. A useful resource for finding Symfony2 specific bundles is the website <a href="http://knpbundles.com/" target="_blank">Knp Bundles</a>. It searches the web for bundles and assigns scores to them, based on parameters like the number of followers on GitHub, if there is a README file present, etc. If bundles are packaged, they can be installed just like any other Composer package. Two of the most popular bundles are <a href="https://github.com/FriendsOfSymfony/FOSUserBundle" target="_blank">FOSUserBundle</a> and <a href="https://github.com/sonata-project/SonataAdminBundle" target="_blank">SonataAdminBundle</a>.
+</p>
+
+<p>
+The FOSUserBundle adds support for a database-backed user management system in Symfony2. Users can be stored with Doctrine ORM, MongoDB/CouchDB ODM or <a href="http://propelorm.org/" target="_blank">Propel</a>. The bundle also provides features like registration support, with an optional confirmation per mail, and password reset support. It does not provide an authentication system of its own but relies on the core SecurityBundle for this instead.
+</p>
+
+<p>
+SonataAdminBundle is a bundle to generate robust user-friendly administration interfaces. You basically tell it about your model, which can be Doctrine ORM, <a href="http://docs.doctrine-project.org/projects/doctrine-mongodb-odm" target="_blank">MongoDB ODM</a> or <a href="http://phpcr.github.io/" target="_blank">PHPCR</a>. Sonata will activate an entire create-read-update-delete (CRUD) flow with forms, lists and everything you need to manage your model. You can override any of the defaults to make it fit your specific needs. The bundle relies on some other bundles like <a href="https://github.com/sonata-project/SonataBlockBundle" target="_blank">SonataBlockBundle</a> for a block system and <a href="https://github.com/KnpLabs/KnpMenuBundle" target="_blank">KnpMenuBundle</a> for menu management.
+</p>
+
+<p>
+These bundles are very useful, so if you need a feature for your website, consider using and extending them before rolling your own custom solution. It is easy to override any part of a bundle, and this is a process that is well covered in the Symfony2 documentation.
+</p>
+
+<h2>Getting help</h2>
+
+<p>
+The first version of Symfony2 was released on July 28, 2011. Last month, version 2.3 was released. This is also the first Long Term Support (LTS) version, which means it will get a support period of three years, plus one extra year for security fixes. Since the release of 2.3, backward compatibility will be kept at all cost. If not possible, the change will be scheduled for the next major version. If licenses are important for you, you may be happy to read that the 2.3 LTS only depends on <a href="http://en.wikipedia.org/wiki/MIT_license" target="_blank">MIT</a>/<a href="http://en.wikipedia.org/wiki/BSD_license" target="_blank">BSD</a> licensed code.
+</p>
+
+<p>
+A lot of effort is put into writing and maintaining documentation. There is a reference book with documentation that covers the basics of Symfony2, ideally for getting started. If you want to delve deep into the components, you will find that each of them has their own set of documentation. There is also a cookbook where you can find specific solutions for specific needs. All this documentation can be found on the <a href="http://symfony.com/" target="_blank">Symfony website</a>.
+</p>
+
+<p>
+Also worth mentioning is that Symfony has a conference called <a href="http://symfony.com/doc" target="_blank">"Symfony Live"</a> that is held multiple times a year, all over the world. The talks that are given at Symfony Live are published afterwards on the <a href="http://www.youtube.com/sensiolabs" target="_blank">SensioLabs YouTube channel</a>.
+</p>
+
+<p>
+<a href="http://sensiolabs.com/" target="_blank">SensioLabs</a> is the commercial company behind Symfony. If you are interested in training, paid support or certification, this is one of the companies that you can contact. The founder of SensioLabs and project lead of Symfony, Fabien Potencier, regularly writes on the <a href="http://symfony.com/blog" target="_blank">Symfony blog</a> and on <a href="http://fabien.potencier.org/" target="_blank">his own blog</a>.
+</p>

@@ -1,0 +1,107 @@
+<!--
+creation_date: 2012-06-02
+permalink: ssh_vpn_to_your_home_network
+title: SSH VPN to your home network
+keywords: Linux, OpenSSH
+-->
+<p>
+This is the first time I used OpenSSH as a VPN. Like always, it just works.
+</p>
+
+<h2>Setup</h2>
+
+<p>
+In the example below, I am on a corporate network with my laptop. The server on my own network runs an SSH server. The firewall on my network forwards traffic from port 80 to the server’s port 22. I want to be able to access my own servers from an external location.
+</p>
+
+<p>
+Smart firewalls will probably see that it’s not HTTP traffic going to the remote port 80 and will block the traffic. You could work around this problem by using port 443 (HTTPS) and send your SSH traffic through stunnel. But, that is out of the scope of this article.
+</p>
+
+<p>
+Remember that using this information to tunnel out of a network without permission is probably not ok. Always ask for permission before attempting to do this on someone else’s network.<br>
+<br>
+<img src="/img/post/ssh_vpn.png" alt="network diagram">
+</p>
+
+<h2>Preparation</h2>
+
+<p>
+How was this set up? Well, first of all the server has the ability to forward packets. You can configure this with (as root):
+</p>
+
+<p class="terminal">sysctl -w net.ipv4_forward=1</p>
+
+<p>
+And uncomment the line in /etc/sysctl.conf to make it permanent.
+</p>
+
+<p>
+Next thing to do is allow SSH tunnelling by setting <span class="terminal">PermitTunnel yes</span> in /etc/ssh/sshd_config (and restart ssh after doing so).
+</p>
+
+<p>
+You will also need to NAT the connections on the server:
+</p>
+
+<p class="terminal">iptables -t nat -A POSTROUTING -s 172.16.0.0/24 -o eth0 -j MASQUERADE</p>
+
+<p>
+Save your iptables and load them in /etc/rc.local (before the return 0) to make this permanent.
+</p>
+
+<p class="terminal">bash -c "iptables-save &gt; /etc/iptables.rules"
+iptables-restore &lt; /etc/iptables.rules (in /etc/rc.local)</p>
+
+<h2>Connecting</h2>
+
+<p>
+Configuring the actual VPN is really easy. Just make sure you have an SSH key installed on the server so you can login password-less. Quick howto (on the client):
+</p>
+
+<p class="terminal">cd ~/.ssh && ssh-keygen -t dsa
+ssh-copy-id root@192.168.0.5 (while you are on the same network)</p>
+
+<p>
+Put the following in the server’s /etc/network/interfaces:
+</p>
+
+<p class="terminal">iface tun0 inet static
+    pre-up sleep 5
+    address 10.14.0.1
+    netmask 255.255.255.0
+    pointopoint 10.14.0.2</p>
+
+<p>
+Put the following in the client’s /etc/network/interfaces:
+</p>
+
+<p class="terminal">iface tun0 inet static
+    pre-up ssh -p80 -NTCf -w 0:0 66.66.66.66
+    pre-up sleep 5
+    address 172.16.0.2
+    pointopoint 172.16.0.1
+    netmask 255.255.255.0
+    up ip route add 192.168.0.0/24 via 172.16.0.2
+    up echo "search myhome.local\nnameserver 192.168.0.1" &gt; /etc/resolv.conf
+    up ssh 66.66.66.66 ifup tun0
+    down ip route del 192.168.0.0/24
+    down echo "nameserver 10.0.0.1\nsearch corporation.com" &gt; /etc/resolv.conf
+    post-down ssh 66.66.66.66 ifdown tun0</p>
+
+<p>
+When you <span class="terminal">ifup tun0</span> on the client, it will activate tunneling, create both tun0 interfaces add routing to the remote network, change the local DNS resolver. When you <span class="terminal">ifdown tun0</span> on the client, it will remove the routing, restore the DNS resolver and stop tun0 on the remote machine.
+</p>
+
+<p>
+To make it super easy, allow yourself (or a group with name vpn) password-less sudo rights to ifup and ifdown:
+</p>
+
+<p class="terminal">%vpn ALL=NOPASSWD: /sbin/ifup,/sbin/ifdown</p>
+
+<p>
+You could then use these two aliases to connect/disconnect:
+</p>
+
+<p class="terminal">alias vpn_up="echo -n 'Staring ...'; sudo ifup tun0 &gt; /dev/null 2&gt;&amp;1; echo"
+alias vpn_down="echo -n 'Stopping ...'; sudo ifdown tun0 &gt; /dev/null 2&gt;&amp;1; echo"</p>

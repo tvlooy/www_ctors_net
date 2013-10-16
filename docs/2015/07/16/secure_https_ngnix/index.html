@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Nginx secure HTTPS settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Nginx secure HTTPS settings">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, nginx, ssl">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Nginx secure HTTPS settings</h1>
+    <p class="date">
+        nginx, ssl | July 16, 2015
+    </p>
+    <p>
+Edit: updated February 15, 2016.
+</p>
+
+<p>
+  Recently, OpenSSL has been under fire for being not secure and people have become increasingly aware of the the fact that they need to provide their webservers with the right settings for HTTPS certificates. The defaults are often not secure. These are the configuration settings that I use in Nginx vhosts:
+</p>
+
+<p class="terminal">ssl on;
+ssl_certificate /etc/ssl/certs/yourdomain.crt;
+ssl_certificate_key /etc/ssl/private/yourdomain.key;
+
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+ssl_ciphers ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-DES-CBC3-SHA:ECDHE-RSA-DES-CBC3-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA;
+
+ssl_prefer_server_ciphers on;
+ssl_session_timeout 5m;
+ssl_session_cache shared:SSL:5m;
+</p>
+
+<ul>
+  <li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_protocols" target="_blank">ssl_protocols</a>: no SSL protocols are secure, you must use TLS only
+  <li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_ciphers" target="_blank">ssl_ciphers</a>: unless you must support IE6, this will be just fine. My ciphers are based on <a href="https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_configurations" target="_blank">Mozilla's recommended configurations</a>, then tweaked with <a href="https://github.com/jvehent/cipherscan">CipherScan</a> and checked with <a href="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">Qualys SSL Labs server test</a> and <a href="https://github.com/drwetter/testssl.sh" target="_blank">testssl</a> to support all browsers.
+<li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_prefer_server_ciphers" target="_blank">ssl_prefer_server_ciphers</a>: prefer the server ciphers over client ciphers
+<li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_session_timeout" target="_blank">ssl_session_timeout</a>: allows session reuse
+<li><a href="http://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_session_cache" target="_blank">ssl_session_cache</a>: by default sessions are not cached
+</ul>
+
+<p>
+   You can check your own settings at <a href="https://www.ssllabs.com/ssltest/analyze.html" target="_blank">Qualys SSL Labs server test</a>. With the above settings, you will get an A rating. Eg:
+</p>
+
+<p>
+<img src="/img/post/ssl_ctors_qualys.png">
+</p>
+
+<p>
+   To get an A+ rating, enable the Strict-Transport-Security (HSTS) header. This will make sure your browser will never visit the site over HTTP during the periode of the max-age of the header.
+</p>
+
+<p class="terminal">add_header Strict-Transport-Security "max-age=31536000";</p>
+
+<p>
+There are a lot more headers to consider. For example: <span class="terminal">Content-Security-Policy</span>, <span class="terminal">Public-Key-Pins</span>, <span class="terminal">X-Frame-Options</span>, <span class="terminal">X-XSS-Protection</span>, <span class="terminal">X-Content-Type-Options</span>. See <a href="https://securityheaders.io/" target="_blank">securityheaders.io</a> to check the headers of your own site. The site also has information about what these headers protect against.
+</p>
+
+<p>
+It is also recommended to enable <a href="https://en.wikipedia.org/wiki/OCSP_stapling" target="_blank">OCSP stapling</a>.
+</p>
+
+<p class="terminal">ssl_stapling on;
+ssl_stapling_verify on;
+ssl_trusted_certificate /etc/ssl/certs/fullchain.crt;</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

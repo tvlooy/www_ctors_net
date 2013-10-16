@@ -1,0 +1,45 @@
+<!--
+creation_date: 2015-07-14
+permalink: solr5_java8_debian8
+title: Solr 5.2.1 and Java 8 on Debian 8
+keywords: Solr, Java, Debian
+-->
+<p>
+  Setting up a Solr server has gotten a lot easier than it was in the past. See <a href="https://ctors.net/2014/02/07/solr4_tomcat7_debian7" target="_blank">this article for how to set up a Solr 4 server</a>.
+</p>
+
+<h2>Install Java</h2>
+
+<p>
+   Debian 8 currently packages openjdk-7. While you could just <span class="terminal">apt-get install openjdk-7-jre-headless</span> and have a working Java for your Solr installation, <a href="http://www.oracle.com/technetwork/java/javase/eol-135779.html#Java6-end-public-updates" target="_blank">Java 7 is end of life</a> and the newer <a href="http://lucene.apache.org/solr/5_2_0/SYSTEM_REQUIREMENTS.html" target="_blank">Java 8 is the recommended version</a>.
+</p>
+
+<p>
+Java 8 is in <a href="https://packages.debian.org/jessie-backports/openjdk-8-jre-headless" target="_blank">Jessie's backports</a>. So use that one or install Java 8 from Oracle instead:
+</p>
+
+<p class="terminal">mkdir -p /opt/java
+
+wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz"
+
+tar xvf jdk-8u45-linux-x64.tar.gz -C /opt/java
+update-alternatives --install /usr/bin/java java /opt/java/jdk1.8.0_45/bin/java 1
+update-alternatives --set java /opt/java/jdk1.8.0_45/bin/java
+<p>
+
+<h2>Install Solr</h2>
+
+<p>
+Solr 5 is <a href="https://cwiki.apache.org/confluence/display/solr/Major+Changes+from+Solr+4+to+Solr+5#MajorChangesfromSolr4toSolr5-SolrisNowaStandaloneServer" target="_blank">a standalone server</a>. You no longer need to install a servlet container like Tomcat and deploy a war file. It also comes with <a href="https://cwiki.apache.org/confluence/display/solr/Taking+Solr+to+Production" target="_blank">an installer script</a> for setting up a production system, this script supports various Linux distributions and creates a separate solr user, installs init scripts etc.
+</p>
+
+<p class="terminal">wget http://apache.belnet.be/lucene/solr/5.2.1/solr-5.2.1.tgz
+tar xvf solr-5.2.1.tgz
+./solr-5.2.1/bin/install_solr_service.sh solr-5.2.1.tgz
+</p>
+
+<p>Solr is now available on port 8983. You can create cores from the web interface or directly from the command line with <span class="terminal">bin/solr create -c &lt;corename&gt;</span> (like Timothy Potter commented, thanks!).</p>
+
+<p>
+<img src="/img/post/solr_5_web.png" alt="Solr 5 web interface">
+</p>

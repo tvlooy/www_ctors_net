@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Testdriving Zend Optimizer+</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Testdriving Zend Optimizer+">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, PHP, OPcache">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Testdriving Zend Optimizer+</h1>
+    <p class="date">
+        PHP, OPcache | February 14, 2013
+    </p>
+    <p>
+This article was written for Intracto and first appeared on the <a href="http://www.intracto.com/blog/testdriving-zend-optimizer" target="_blank">Intracto blog</a> on February 14, 2013.
+</p>
+
+<p>
+Last Tuesday, Zend Optimizer+ was released as open source software and I couldn't resist taking it for a spin. This piece of software is a serious candidate to be integrated in the PHP core and is an alternative to APC, another opcode cache solution. Which makes it very interesting for all PHP developers. Let's see what Zend Optimizer+ actually is and how it can be installed.
+</p>
+
+<h2>Opcode caching</h2>
+
+<p>
+PHP is an interpreted language. This means that every time a web page is requested, the server has to compile all the PHP files needed to generate it from source to a binary format that the machine understands. Needless to say, this is slow. There are many PHP accelerators on the market that are basically extensions, designed to improve the performance of software applications.
+</p>
+
+<p>
+Most of them solve the compilation problem by caching the binary format (also known as bytecodes or opcodes) of the PHP scripts in a shared memory location, from where it can be executed directly. This substantially increases the speed of PHP applications. If your code does not yet use an opcode cache, it is advised to start using one right now.
+</p>
+
+<p>
+At the time of this writing, one of the most widely used opcode caches for PHP is the <a href="http://php.net/manual/en/book.apc.php" target="_blank">Alternative PHP Cache</a> (APC). This cache does not limit itself to opcode caching, but it also provides a user cache. This user cache is basically a key-value store that uses a configurable amount of memory. APC also has a nice GUI that looks something like this:<br>
+<br>
+<img src="/img/post/apc_php.png" alt="apc.php output">
+</p>
+
+<p>
+Some time ago, APC was even so popular that all the major PHP developers decided to officially endorse APC and had it scheduled for inclusion in the PHP core no later than PHP 6. A lot has happened since, PHP 6 did not happen yet and APC is still not in core.
+</p>
+
+<p>
+Another PHP accelerator is <a href="https://github.com/zend-dev/ZendOptimizerPlus/" target="_blank">Zend Optimizer+</a>. It also improves PHP performance by storing precompiled script bytecode in the shared memory. This eliminates the stages of reading code from the disk and compiling it on future access. In addition, it applies a few bytecode optimization patterns that make code execution faster.
+</p>
+
+<h2>Open source</h2>
+
+<p>
+Last month, PHP developer and co-founder of Zend Technologies <a href="https://twitter.com/zeevs" target="_blank">Zeev Suraski</a> announced that Zend was looking into open-sourcing Zend Optimizer+ and including it into PHP 5.5. Yesterday, Optimizer+ was effectively released as open source software at <a href="https://github.com/zend-dev/ZendOptimizerPlus/" target="_blank">https://github.com/zend-dev/ZendOptimizerPlus/</a>.<br>
+<br>
+<img src="/img/post/zeev_opcache.png" alt="tweet Zeev Optimizer+">
+</p>
+
+<p>
+Zeev also opened a PHP request for comments (RFC) at <a href="https://wiki.php.net/rfc/optimizerplus" target="_blank">https://wiki.php.net/rfc/optimizerplus</a> to integrate Optimizer+ into the PHP distribution. This means that the next version of PHP may have Optimizer+ built-in as an opcode cache, which suddenly makes it a very interesting piece of software for all PHP developers.
+</p>
+
+<h2>Installation</h2>
+
+<p>
+I immediately booted one of my Debian development boxes with a recent PHP 5.4 to take it for a spin. The first thing you will need to do is remove APC, if you have it installed, because it will interfere with Optimizer+:
+</p>
+
+<p class="terminal">apt-get remove php5-apc</p>
+
+<p>
+Or just disable the module like this:
+</p>
+
+<p class="terminal">php5dismod apc</p>
+
+<p>
+Then, clone the Git repository from GitHub:
+</p>
+
+<p class="terminal">git clone git://github.com/zend-dev/ZendOptimizerPlus.git</p>
+
+<p>
+This downloads the extension source code on your machine. In order to compile it, you need to have the PHP module development package installed:
+</p>
+
+<p class="terminal">apt-get install php5-dev</p>
+
+<p>
+Change directory into ZendOptimizerPlus, phpize, run the configure script and then compile the extension:
+</p>
+
+<p class="terminal">cd ZendOptimizerPlus
+phpize
+./configure --enable-optimizer-plus
+make</p>
+
+<p>
+The extension will be compiled into the .libs folder. Copy it into your PHP extension library:
+</p>
+
+<p class="terminal">cp .libs/ZendOptimizerPlus.so /usr/lib/php5/20100525/</p>
+
+<p>
+Now you can configure PHP to load the extension. If you would like to tune the extension to match your exact needs, consult the README where all parameters are well documented. You can already configure the extension to use sane defaults, like described in the <a href="https://github.com/zend-dev/ZendOptimizerPlus/blob/master/README" target="_blank">README on GitHub</a>:
+</p>
+
+<p class="terminal">cat &lt;&lt; EOF &gt; /etc/php5/mods-available/ZendOptimizerPlus.ini
+zend_extension=/usr/lib/php5/20100525/ZendOptimizerPlus.so
+zend_optimizerplus.memory_consumption=128
+zend_optimizerplus.interned_strings_buffer=8
+zend_optimizerplus.max_accelerated_files=4000
+zend_optimizerplus.revalidate_freq=60
+zend_optimizerplus.save_comments=0
+zend_optimizerplus.fast_shutdown=1
+zend_optimizerplus.enable_file_override=1
+zend_optimizerplus.enable_cli=1
+EOF</p>
+
+<p>
+And run:
+</p>
+
+<p class="terminal">php5enmod ZendOptimizerPlus</p>
+
+<p>
+When you restart your Apache2 server and take a look at <a href="http://php.net/manual/en/function.phpinfo.php" target="_blank">phpinfo()</a> output, you will now have the following section:<br>
+<br>
+<img src="/img/post/zend_optimizer_phpinfo.png" alt="Optimizer+ phpinfo">
+</p>
+
+<p>
+Optimizer+ does not come with a nice PHP statistics page like APC but you can use the "accelerator_get_status()" function to print memory usage, cache statistics and the list of cached PHP scripts. The function returns an array containing the following elements:
+</p>
+
+<ul>
+    <li>accelerator_enabled - boolean; TRUE if code acceleration is enabled, FALSE otherwise
+</ul>
+
+<ul>
+    <li>cache_full -  boolean; TRUE if the Optimizer+ cache is full
+</ul>
+
+<ul>
+    <li>memory_usage - array; contains information about Optimizer+ memory usage, with the following keys:
+    <ul>
+        <li>used_memory - integer; bytes of memory used
+        <li>free_memory - integer; bytes of memory available for cache
+        <li>wasted_memory - integer; bytes of memory used by invalid or outdated code
+        <li>Wasted memory is reclaimed when the accelerator is reset, or when the percentage of wasted memory reaches the value of the max_wasted_percentage directive
+        <li>current_wasted_percentage - float; The percentage of wasted opcode cache memory out of total memory available
+    </ul>
+</ul>
+
+<ul>
+    <li>accelerator_statistics - array; contains current opcode cache usage statistics, with the following keys:
+    <ul>
+        <li>num_cached_scripts - integer; number of cached scripts
+        <li>max_cached_scripts - integer; maximum number of cached scripts
+        <li>hits - integer; number of cache "hits" - that are requests for files that had valid cache entries
+        <li>last_restart_time - integer; timestamp of the last restart time
+        <li>misses - integer; number of cache "misses" - that are requests for files which were not cached
+        <li>blacklist_misses - integer; number of requests to blacklisted files
+        <li>blacklist_miss_ratio - float; ratio between hits and requests to blacklisted files
+        <li>accelerator_hit_rate - float; ratio between opcode cache hits and misses
+    </ul>
+</ul>
+
+<ul>
+    <li>scripts - array; Each key in the array is the name of an accelerated script. Values are an array with information about the script, with the following keys:
+    <ul>
+        <li>full_path - string; the full path to the script
+        <li>hits - integer; number of cache hits for this script
+        <li>memory_consumption - integer; bytes of memory used to cache this script
+        <li>last_used - string; string representation of the last time this script was fetched from cache. For example "Thu Jan 31 13:37:40 2008"
+        <li>last_used_timestamp - integer; UNIX timestamp of the last time this script was fetched from cache
+        <li>timestamp - integer; UNIX timestamp of when the script was cached
+    </ul>
+</ul>
+
+<h2>Benchmark</h2>
+
+<p>
+Edit: February 27, 2013: Some frameworks / CMSes were benchmarked by Zeev, you can find the results linked in <a href="https://wiki.php.net/rfc/optimizerplus" target="_blank">the RFC</a>. Symfony2 was missing from this list, so I did a benchmark myself with Symfony2.1.8 on Nginx / PHP FPM 5.4.8. Optimizer+ is version 7.0.0-dev, APC is 3.1.13. The Y axis contains the number of requests per second.<br>
+<br>
+<img src="/img/post/opcache_bench_54.png" alt="OPcache 5.4 benchmark">
+</p>
+
+<h2>Future</h2>
+
+<p>
+The RFC is still under discussion but Zend Optimizer+ is a good candidate to make it into the PHP core.
+</p>
+
+<p>
+One of the downsides of Optimizer+ is that it does not have a user cache API like APC. Another important point is that APC uses a memory manager and can reclaim memory associated with a script that is no longer in use. Optimizer+ just marks such memory as dirty, but never actually reclaims it. Optimizer+ restarts itself once the dirty percentage climbs above a configurable threshold.
+</p>
+
+<p>
+On the upside, Optimizer+ promotes itself to have a consistent performance edge over APC. Also, it advertises to be fully compatible with PHP releases even before they come out. Lastly, Optimizer+ has optional corruption detection capabilities that can prevent a server-wide crash in case of data corruption.
+</p>
+
+<p>
+We'll see how it goes from here. There is still some work to be done and it is unsure if Optimizer+ will even make it into PHP 5.5. Also this is not a one man decision, all the PHP developers will soon vote on the RFC in order for it to be accepted.
+</p>
+
+<p>
+Edit March 29, 2013: In the meanwhile, Zend Optimizer+ was <a href="https://github.com/zend-dev/ZendOptimizerPlus/commit/fbca0568efb60c24b28a212b796e4385860b5730" target="_blank">renamed to OPcache</a> and did make it into PHP 5.5.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

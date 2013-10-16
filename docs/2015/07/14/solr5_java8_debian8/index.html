@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Solr 5.2.1 and Java 8 on Debian 8</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Solr 5.2.1 and Java 8 on Debian 8">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Solr, Java, Debian">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Solr 5.2.1 and Java 8 on Debian 8</h1>
+    <p class="date">
+        Solr, Java, Debian | July 14, 2015
+    </p>
+    <p>
+  Setting up a Solr server has gotten a lot easier than it was in the past. See <a href="https://ctors.net/2014/02/07/solr4_tomcat7_debian7" target="_blank">this article for how to set up a Solr 4 server</a>.
+</p>
+
+<h2>Install Java</h2>
+
+<p>
+   Debian 8 currently packages openjdk-7. While you could just <span class="terminal">apt-get install openjdk-7-jre-headless</span> and have a working Java for your Solr installation, <a href="http://www.oracle.com/technetwork/java/javase/eol-135779.html#Java6-end-public-updates" target="_blank">Java 7 is end of life</a> and the newer <a href="http://lucene.apache.org/solr/5_2_0/SYSTEM_REQUIREMENTS.html" target="_blank">Java 8 is the recommended version</a>.
+</p>
+
+<p>
+Java 8 is in <a href="https://packages.debian.org/jessie-backports/openjdk-8-jre-headless" target="_blank">Jessie's backports</a>. So use that one or install Java 8 from Oracle instead:
+</p>
+
+<p class="terminal">mkdir -p /opt/java
+
+wget --no-cookies --no-check-certificate --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com%2F; oraclelicense=accept-securebackup-cookie" "http://download.oracle.com/otn-pub/java/jdk/8u45-b14/jdk-8u45-linux-x64.tar.gz"
+
+tar xvf jdk-8u45-linux-x64.tar.gz -C /opt/java
+update-alternatives --install /usr/bin/java java /opt/java/jdk1.8.0_45/bin/java 1
+update-alternatives --set java /opt/java/jdk1.8.0_45/bin/java
+<p>
+
+<h2>Install Solr</h2>
+
+<p>
+Solr 5 is <a href="https://cwiki.apache.org/confluence/display/solr/Major+Changes+from+Solr+4+to+Solr+5#MajorChangesfromSolr4toSolr5-SolrisNowaStandaloneServer" target="_blank">a standalone server</a>. You no longer need to install a servlet container like Tomcat and deploy a war file. It also comes with <a href="https://cwiki.apache.org/confluence/display/solr/Taking+Solr+to+Production" target="_blank">an installer script</a> for setting up a production system, this script supports various Linux distributions and creates a separate solr user, installs init scripts etc.
+</p>
+
+<p class="terminal">wget http://apache.belnet.be/lucene/solr/5.2.1/solr-5.2.1.tgz
+tar xvf solr-5.2.1.tgz
+./solr-5.2.1/bin/install_solr_service.sh solr-5.2.1.tgz
+</p>
+
+<p>Solr is now available on port 8983. You can create cores from the web interface or directly from the command line with <span class="terminal">bin/solr create -c &lt;corename&gt;</span> (like Timothy Potter commented, thanks!).</p>
+
+<p>
+<img src="/img/post/solr_5_web.png" alt="Solr 5 web interface">
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

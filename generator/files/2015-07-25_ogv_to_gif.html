@@ -1,0 +1,26 @@
+<!--
+creation_date: 2015-07-25
+permalink: ogv_to_gif
+title: Convert OGV to GIF
+keywords: linux, mplayer, imagemagick
+-->
+<p>
+This is a tip / trick to convert a ogv video to an animated gif.
+</p>
+
+<p>
+Make a screen recording using RecordMyDesktop (apt-get install gtk-recordmydesktop). Save the output to for example out.ogv.
+</p>
+
+<p>
+Use mplayer (apt-get install mplayer) to convert the ogv frames to separate images.
+</p>
+
+<p class="terminal">mplayer -ao null out.ogv -vo jpeg:outdir=output</p>
+
+<p>
+Use convert (apt-get install imagemagick) to combine all the separate images into one gif. And optionally use convert again to optimize the gif so it becomes smaller in disk space. 
+</p>
+
+<p class="terminal">convert output/* output.gif
+convert output.gif -fuzz 10% -layers Optimize optimised.gif</p>

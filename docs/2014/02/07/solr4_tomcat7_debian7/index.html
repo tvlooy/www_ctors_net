@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Solr 4.10 and Tomcat 7 on Debian 7</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Solr 4.10 and Tomcat 7 on Debian 7">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Solr, Tomcat, Debian">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Solr 4.10 and Tomcat 7 on Debian 7</h1>
+    <p class="date">
+        Solr, Tomcat, Debian | February 07, 2014
+    </p>
+    <p>Edit: Update March 15, 2015 for Solr 4.10.</p>
+
+<p>
+This article describes how to install a multi-core Solr 4.10 installation with Tomcat 7 on Debian 7. It will also give you some pointers about logging, monitoring and performance. The purpose of this article is to give the reader a pretty clean installation.
+</p>
+
+<h2>Install Java</h2>
+
+<p>Tomcat 7 from packages will install OpenJDK 6 if no Java is installed yet. But starting from version 4.8, Solr requires Java 7 or greater. So first install Java 7.</p>
+
+<p class="terminal"># apt-get install openjdk-7-jre-headless</p>
+
+<h2>Install Tomcat</h2>
+
+<p>Debian 7 has Tomcat 7 in it's repositories by default, so you can install it with apt-get.<p>
+
+<p class="terminal"># apt-get install tomcat7 tomcat7-admin</p>
+
+<p>
+Configure an admin user for Tomcat by adding a line in "/var/lib/tomcat7/conf/tomcat-users.xml":
+</p>
+
+<p class="terminal">&lt;user username="admin" password="secret" roles="manager-gui,admin-gui"/&gt;</p>
+
+<p>
+After restarting Tomcat, you should be able to access the manager at "http://127.0.0.1:8080/manager/html"
+</p>
+
+<p class="terminal"># service tomcat7 restart</p>
+
+<h2>Install Solr</h2>
+
+<p>Debian doesn't package Solr 4.10 yet, so you will have to download and install this yourself:</p>
+
+<p class="terminal"># wget ftp://&lt;<a href="http://www.apache.org/dyn/closer.cgi/lucene/solr" target="_blank">download-mirror</a>&gt;/mirrors/ftp.apache.org/lucene/solr/4.10.4/solr-4.10.4.tgz
+# tar xzvf solr-4.10.4.tgz
+# mv solr-4.10.4 /usr/share/solr
+# mkdir -p /usr/share/solr/live/solr
+# cp /usr/share/solr/example/webapps/solr.war /usr/share/solr/live/solr/solr.war
+# chown -R tomcat7:tomcat7 /usr/share/solr</p>
+
+<h2>Configure logging</h2>
+
+<p class="quote">
+The Simple Logging Facade for Java (SLF4J) serves as a simple facade or abstraction for various logging frameworks (e.g. java.util.logging, logback, log4j).
+</p>
+
+<p>Solr uses SLF4J for logging, but you need to configure a logging framework yourself. This is required to make Solr run. For example to bind SLF4J to Apache log4j:</p>
+
+<p class="terminal"># cp /usr/share/solr/example/lib/ext/* /usr/share/tomcat7/lib
+# cp /usr/share/solr/example/resources/log4j.properties /usr/share/tomcat7/lib</p>
+
+<p>
+Edit /usr/share/tomcat7/lib/log4j.properties and set <span class="terminal">solr.log=logs/</span> to <span class="terminal">solr.log=/var/log/solr</span>. Next create the log directory and set the proper permissions:</p>
+
+<p class="terminal"># mkdir /var/log/solr
+# chown tomcat7:tomcat7 /var/log/solr</p>
+
+<p>Make sure the log will not eat up the entire filesystem and add it to logrotate. Create a file "/etc/logrotate.d/solr" with this content:</p>
+
+<p class="terminal">/var/log/solr/solr.log {
+  copytruncate
+  daily
+  rotate 5
+  compress
+  missingok
+  create 640 tomcat7 tomcat7
+}</p>
+
+<h2>Add Solr to Tomcat</h2>
+
+<p>
+To deploy Solr to Tomcat, create a file named "/etc/tomcat7/Catalina/localhost/solr.xml" with the folowing content:
+</p>
+
+<p class="terminal">&lt;Context docBase="/usr/share/solr/live/solr/solr.war" debug="0" crossContext="true"&gt;
+    &lt;Environment name="solr/home"
+                 type="java.lang.String"
+                 value="/usr/share/solr/live/solr"
+                 override="true" /&gt;
+&lt;/Context&gt;</p>
+
+<p>
+Copy over the Solr configuration file from the examples.
+</p>
+
+<p class="terminal">cp /usr/share/solr/example/solr/solr.xml /usr/share/solr/live/solr/solr.xml</p>
+
+<p>
+After restarting Tomcat you should already see a running Solr instance in the Tomcat application manager.
+</p>
+
+<p><img src="/img/post/tomcat7_solr.png" alt="Solr on Tomcat"></p>
+
+<p>
+Click on the /solr link to access the Solr dashboard.
+</p>
+
+<p><img src="/img/post/solr4_dashboard.png" alt="Solr dashboard"></p>
+
+<h2>Add cores</h2>
+
+<p>
+For this example I added two cores. The instructions below to add a core are parametrized with the core name to make it easy to repeat the steps for each core:
+</p>
+
+<p class="terminal"># CORE_NAME=ctors_1
+# mkdir -p /usr/share/solr/live/solr/cores/${CORE_NAME}/data/index
+# mkdir -p /usr/share/solr/live/solr/cores/${CORE_NAME}/conf
+# cp -R /usr/share/solr/example/solr/collection1/conf/* \
+        /usr/share/solr/live/solr/cores/${CORE_NAME}/conf/
+# echo "name=${CORE_NAME}" >> \
+    /usr/share/solr/live/solr/cores/${CORE_NAME}/core.properties
+# chown -R tomcat7:tomcat7 /usr/share/solr/live/solr/cores/${CORE_NAME}
+</p>
+
+<p>
+Optionally, you could add ownership for a regular user to the conf directory of the core. For example when you have multiple web projects that each have their own SFTP user account, this account can then also be used to upload new schema files etc. As a bonus you could symlink the conf folder from the project's www folder so the user can easily find his way to the correct configuration files. Note: do not publish these files in the document root of your webserver.
+</p>
+
+<p class="terminal"># chown -R ${CORE_NAME}:tomcat7 /usr/share/solr/live/solr/cores/${CORE_NAME}/conf/
+# ln -s /usr/share/solr/live/solr/cores/${CORE_NAME}/conf \
+    /var/www/${CORE_NAME}/solr_core_conf</p>
+
+<p>
+After restarting Tomcat, you should be able to access the Solr core admin:
+</p>
+
+<p class="terminal"># service tomcat7 restart</p>
+
+<p>
+<img src="/img/post/solr4_cores.png" alt="Solr core management"><br>
+<img src="/img/post/solr4_query.png" alt="Solr queries">
+</p>
+
+<h2>Configure Munin</h2>
+
+<p>
+When adding new services to a system, you should always make sure you have at least some basic monitoring. For example to enable the Munin plugins for Tomcat, first install the required dependencies:
+</p>
+
+<p class="terminal"># apt-get install liblwp-useragent-determined-perl libxml-simple-perl</p>
+
+<p>
+Next, activate the plugins:
+</p>
+
+<p class="terminal"># cd /etc/munin/plugins
+# ln -s /usr/share/munin/plugins/tomcat_access
+# ln -s /usr/share/munin/plugins/tomcat_jvm
+# ln -s /usr/share/munin/plugins/tomcat_threads
+# ln -s /usr/share/munin/plugins/tomcat_volume</p>
+
+<p>
+Munin should be able to access your protected Tomcat instance. Add your credentials (optionally, you could add an extra account specifically for Munin) in "/etc/munin/plugin-conf.d/munin-node":
+</p>
+
+<p class="terminal">[tomcat_*]
+env.user admin
+env.password secret
+</p>
+
+<p>
+<img src="/img/post/tomcat_1.png" alt="Tomcat Munin access and memory"><br>
+<img src="/img/post/tomcat_2.png" alt="Tomcat Munin threads and volume">
+</p>
+
+<p>
+The same is true for Solr. I use these Munin plugins <a href="https://github.com/averni/munin-solr" target="_blank">https://github.com/averni/munin-solr</a>. They are easy to install:
+</p>
+
+<p class="terminal">cd /usr/share/munin/plugins
+wget https://raw.github.com/averni/munin-solr/master/solr4_.py
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_numdocs_ctors_1
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_numdocs_ctors_2
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_requesttimes_select
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_qps
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_qps_ctors_1_select
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_qps_ctors_2_select
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_indexsize
+ln -s /usr/share/munin/plugins/solr4_.py /etc/munin/plugins/solr_memory</p>
+
+<p>Configure the plugin in "/etc/munin/plugin-conf.d/munin-node":</p>
+
+<p class="terminal">[solr4_*]
+env.solr4_host_port solrhost:8080
+env.solr4_url /solr
+env.solr4_qpshandler_select /select<p>
+
+<h2>Java performance tips</h2>
+
+<p>
+On a dedicated Solr server you should use as much memory as possible, let's say up to 70% of the total memory of the server. Always keep an eye on the monitoring to make sure your changes actually benefit the setup. The allowed memory can be adjusted by setting the value "JAVA_OPTS" in "/etc/default/tomcat7":
+</p>
+
+<p class="terminal">-Xms1024m -Xmx1024m</p>
+
+<p>
+The "-Xms" option sets the maximum allowed size of the heap and the "-Xmx" option sets the initial size of the heap.
+</p>
+
+<p class="quote">
+The concurrent mark sweep garbage collector (CMS) is targeted at applications that are sensitive to garbage collection pauses. It performs most garbage collection activity concurrently, i.e., while the application threads are running, to keep garbage collection-induced pauses short.
+</p>
+
+<p>
+This is enabled (by default) with:
+</p>
+
+<p class="terminal">-XX:+UseConcMarkSweepGC</p>
+
+<p>
+Additionally, you can activate incremental mode (i-cms) for the CMS.
+</p>
+
+<p class="quote">
+Normally, the CMS uses one or more processors during the entire concurrent tracing or sweeping phase, without voluntarily relinquishing them. This overhead can be too much of a disruption for applications with response time constraints that might otherwise have utilized the processing cores, particularly when run on systems with just one or two processors. Incremental mode solves this problem by breaking up the concurrent phases into short bursts of activity, which are scheduled to occur mid-way between minor pauses.
+</p>
+
+<p>
+Again this is something you should carefully test and monitor. Activate the option with:
+</p>
+
+<p class="terminal">-XX:+CMSIncrementalMode</p>
+
+<p>More about Java GC tuning:</p>
+
+<ul>
+  <li><a href="http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html" target="_blank">http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html</a>
+  <li><a href="http://docs.oracle.com/javase/7/docs/technotes/guides/vm/cms-6.html" target="_blank">http://docs.oracle.com/javase/7/docs/technotes/guides/vm/cms-6.html</a>
+</ul>
+
+<h2>Solr performance tip</h2>
+
+<p>
+While indexing with Solr, the memory usage will grow with the number of indexed documents until a commit is performed. After that, the GC will free up the memory. There is an option "autocommit" that can be set in the "solrconfig.xml" that causes commits to happen automatically. Read more about this at:
+</p>
+
+<ul>
+    <li><a href="http://wiki.apache.org/solr/SolrPerformanceFactors#RAM_Usage_Considerations" target="_blank">http://wiki.apache.org/solr/SolrPerformanceFactors#RAM_Usage_Considerations</a>
+</ul>
+
+<h2>Solr with PHP</h2>
+
+<p>
+If you are using Solr with Drupal, you don't need this step. But if you use something else, you probably will. Add the required dependencies to build PECL packages on your system:
+</p>
+
+<p class="terminal"># apt-get install php-pear php5-dev php5-curl \
+    gcc libcurl4-gnutls-dev libxml2 libxml2-dev make
+</p>
+
+<p>
+Next, install the Solr library with PEAR:
+</p>
+
+<p class="terminal"># pear install pecl/solr</p>
+
+<p>
+Load the module by adding it to your ini configuration:
+</p>
+
+<p class="terminal"># echo extension=solr.so > /etc/php5/conf.d/solr.ini</p>
+
+<p>
+Check if the module gets loaded correctly:
+</p>
+
+<p class="terminal"># php -m | grep solr
+solr</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!--
+creation_date: 2013-12-30
+permalink: openbsd_wireless_access_point
+title: Building an OpenBSD wireless access point
+keywords: OpenBSD, networking
+-->
+<p>
+I have a Cisco/Linksys wireless access point to provide me with WiFi at home. I was never satisfied with the device, from day one, and it caused lots of trouble. I would never buy Cisco/Linksys again. Some time ago it even started crashing / rebooting very frequently. Which by the way also feels very creepy after watching <a href="https://www.youtube.com/watch?v=b0w36GAyZIA" target="_blank">@ioerror's talk at #30c3</a>. Anyway, I'm totally fed up with the "broken" device so today I decided to see what hardware I had lying around to build a replacement.
+</p>
+
+<p>
+My home network is protected by an <a href="http://openbsd.org/" target="_blank">OpenBSD</a> NAT/firewall which also does things like DHCP and DNS. It used to run on a <a href="http://soekris.com/" target="_blank">Soekris</a> <a href="http://soekris.com/products/net5501.html" target="_blank">net5501</a>. I also had an older, less powerful <a href="http://soekris.com/products/net4801.html" target="_blank">net4801</a> that was not in use. I found a wireless USB adapter and a wireless miniPCI adapter that I "recovered" from an old D-Link router. That was my initial hotspot setup.
+</p>
+
+<p>
+Things changed over time. The home network is now running on <a href="https://www.pcengines.ch/apu2.htm" target="_blank">APU2</a> and the Soekris net5501 became my the wifi access point, I got myself a athn card for it so I can do WPA. It runs OpenBSD 6.0 and when I upgrade it to anything more recent, performance drops to max 2Mbps, see also <a href="https://marc.info/?l=openbsd-bugs&m=151009278125431&w=2" target="_blank">https://marc.info/?l=openbsd-bugs&m=151009278125431&w=2</a>. Keep that in mind if you are on a similar setup.
+</p>
+
+<h2>pxeboot</h2>
+
+<p>
+The APU2 was set up with pxeboot capabilities. That is actually very easy. Just adding a single line in the /etc/dhcpd.conf:
+</p>
+
+<p class="terminal">filename "pxeboot";</p>
+
+<p>
+Off course the tftp service must be running too:
+</p>
+
+<p class="terminal">rcctl start tftpd</p>
+
+<p>
+The tftp service points to the directory /tftpboot. Which was created and populated like this:
+</p>
+
+<p class="terminal"># mkdir -p /tftpboot
+# cd /tftpboot
+# ftp https://cloudflare.cdn.openbsd.org/pub/OpenBSD/6.0/i386/pxeboot
+# ftp https://cloudflare.cdn.openbsd.org/pub/OpenBSD/6.0/i386/bsd.rd
+# mkdir etc
+# cat &lt;&lt; EOF &gt; etc/boot.conf
+stty com0 19200
+set tty com0
+boot tftp:/bsd.rd
+EOF</p>
+
+<p>
+I think the default baud rate of a Soekris is also 19200, so I'm just adapting the OpenBSD console to that.
+</p>
+
+<h2>Installing base</h2>
+
+<p>
+For installing the base system I hooked up the Soekris with my laptop using a serial to USB cable. There are a lot of Linux tools available that can connect to a serial device. For example cu, screen (not tmux unfortunately) and ckermit. I used ckermit:
+</p>
+
+<p class="terminal">$ sudo apt-get install ckermit
+$ kermit
+C-Kermit&gt;set line /dev/ttyUSB0
+C-Kermit&gt;set speed 19200
+C-Kermit&gt;set carrier-watch off
+C-Kermit&gt;connect
+</p>
+
+<p>
+When the power is connected, the system starts comBIOS and allows you to jump into configuration by pressing ctrl+p. At the comBIOS prompt, start network boot with this instruction:
+</p>
+
+<p class="terminal">boot f0</p>
+
+<p>
+The system will use DHCP and the APU2 will give it instructions for pxeboot. The bsd.rd (ramdisk) kernel is loaded and the installation starts. A default installation was just fine in this case.
+</p>
+
+<p class="terminal">... comBIOS output ...
+
+switching console to com0
+                         &gt;&gt; OpenBSD/i386 PXEBOOT 3.31
+booting tftp:/bsd.rd: 3181055+1369088+3366920+0+454656 [349692+107+290608+284430]=0x8dfee4
+entry point at 0x201000
+
+Copyright (c) 1982, 1986, 1989, 1991, 1993
+	The Regents of the University of California.  All rights reserved.
+Copyright (c) 1995-2019 OpenBSD. All rights reserved.  https://www.OpenBSD.org
+
+OpenBSD 6.5-beta (RAMDISK_CD) #1272: Sat Mar 16 23:11:49 MDT 2019
+    deraadt@i386.openbsd.org:/usr/src/sys/arch/i386/compile/RAMDISK_CD
+
+... dmesg output ...
+
+Welcome to the OpenBSD/i386 6.0 installation program.
+(I)nstall, (U)pgrade or (S)hell?
+</p>
+
+<h2>Network interfaces</h2>
+
+<p>
+The APU2 assigns a fixed IP for the device based on it's MAC address. The wired interface is /etc/hostname.<a href="http://www.openbsd.org/cgi-bin/man.cgi?query=vr" target="_blank">vr0</a>:
+</p>
+
+<p class="terminal">dhcp</p>
+
+<p>
+For the machine to allow forwarding traffic between interfaces, the following system control must be active and uncommented in /etc/sysctl.conf:
+</p>
+
+<p class="terminal">net.inet.ip.forwarding=1</p>
+
+<p>
+The two wireless interfaces I got for the machine is <a href="http://www.openbsd.org/cgi-bin/man.cgi?query=athn" target="_blank">athn</a>. It needs non-free firmware but OpenBSD installs that automatically.
+</p>
+
+<p>
+The athn interface supports WPA. The device is configured in /etc/hostname.athn0:
+</p>
+
+<p class="terminal">inet 10.0.1.1 255.255.255.0
+mediaopt hostap
+nwid ctors wpakey mysecretpassword chan 9
+</p>
+
+<p>
+The wireless network has it's own IP range 10.0.1/24. The net5501 will hand out IP's for it on the athn interface. A DHCP service is started like this in /etc/rc.conf.local:
+</p>
+
+<p class="terminal">dhcpd_flags="athn0"</p>
+
+<p>
+The DHCP service config is in /etc/dhcpd.conf:
+</p>
+
+<p class="terminal">option domain-name-servers 10.0.0.1;
+subnet 10.0.1.0 netmask 255.255.255.0 {
+        option routers 10.0.1.1;
+        range 10.0.1.10 10.0.1.20;
+}
+</p>
+
+<p>
+To make the new subnet reachable from you wired network, add this to the APU's internal network interface /etc/hostname.<a href="http://www.openbsd.org/cgi-bin/man.cgi?query=vr" target="_blank">vr1</a>. 10.0.0.2 would be the IP of the access point's wired interface:
+</p>
+
+<p class="terminal">!route add -net 10.0.1/24 10.0.0.2</p>
+
+<h2>OpenBSD</h2>
+
+<p>
+This software is all installed by default on an OpenBSD system and just needs some configuration. I'm always surprised how easy these things are to set up with OpenBSD. This is also explained very well in the documentation, man pages and FAQ. OpenBSD is a system that is completely usable with just the manual pages. It has always been a pleasure to use.
+</p>
+
+<p><img src="/img/post/net4801.jpg" alt="Soekris net4801"></p>
+
+<p><img src="/img/post/net5501.jpg" alt="Soekris net5501"></p>
+
+<p><img src="/img/post/apu2.jpg" alt="Soekris APU2"></p>

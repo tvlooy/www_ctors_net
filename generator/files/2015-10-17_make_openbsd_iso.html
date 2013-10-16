@@ -1,0 +1,56 @@
+<!--
+creation_date: 2015-10-17
+permalink: make_openbsd_iso
+title: Making your own OpenBSD iso
+keywords: openbsd, genisoimage
+-->
+<p>
+So you pre-ordered your OpenBSD CD set but don't have a CD-ROM drive in your computer? This is how you build your own install.iso.
+</p>
+
+<p>
+<img src="https://ctors.net/img/post/openbsd58.jpg" alt="OpenBSD 5.8 CD sets">
+</p>
+
+<p>
+Prepare the directory structure.
+</p>
+
+<p class="terminal">$ mkdir -p /tmp/OpenBSD/5.8/i386
+$ /tmp/OpenBSD/5.8/i368</p>
+
+<p>
+I ripped my files from the CD on an iMac with a CD-ROM drive and copied them to my CD-ROM-less Lenovo Yoga. My directory now hold these files: 
+</p>
+
+<p class="terminal">$ ls -l
+-rw-r--r-- 1 tvl tvl 52962862 okt 17 18:04 base58.tgz
+-rwxr--r-- 1 tvl tvl     2048 okt 17 18:04 boot.catalog
+-rwxr-xr-x 1 tvl tvl 10539527 okt 17 18:05 bsd
+-rwxr-xr-x 1 tvl tvl 10571701 okt 17 18:06 bsd.mp
+-rwxr-xr-x 1 tvl tvl  7032722 okt 17 18:06 bsd.rd
+-rw-r--r-- 1 tvl tvl    72956 okt 17 18:06 cdboot
+-rw-r--r-- 1 tvl tvl     2048 okt 17 18:06 cdbr
+-rw-r--r-- 1 tvl tvl 46524877 okt 17 18:08 comp58.tgz
+-rw-r--r-- 1 tvl tvl  1474560 okt 17 18:08 floppy58.fs
+-rw-r--r-- 1 tvl tvl  2713526 okt 17 18:08 game58.tgz
+-rw-r--r-- 1 tvl tvl    47362 okt 17 18:02 INSTALL.i386
+-rw-r--r-- 1 tvl tvl  8991058 okt 17 18:09 man58.tgz
+-rw-r--r-- 1 tvl tvl    81188 okt 17 18:09 pxeboot
+-rw-r--r-- 1 tvl tvl     1534 okt 17 18:02 SHA256.sig
+-r--r--r-- 1 tvl tvl      845 okt 17 18:02 TRANS.TBL
+-rw-r--r-- 1 tvl tvl 16906508 okt 17 18:10 xbase58.tgz
+-rw-r--r-- 1 tvl tvl 40009842 okt 17 18:11 xfont58.tgz
+-rw-r--r-- 1 tvl tvl 18953340 okt 17 18:12 xserv58.tgz
+-rw-r--r-- 1 tvl tvl  4489136 okt 17 18:13 xshare58.tgz</p>
+
+<p>
+I use the genisoimage package (apt-get install on Debian) to build the iso.
+</p>
+
+<p class="terminal">$ cd ../..
+genisoimage -r -no-emul-boot -b 5.8/i386/cdbr -c boot.catalog -o install58.iso /tmp/OpenBSD</p>
+
+<p>
+You will now have a install58.iso file that you can use to install OpenBSD 5.8 pre-release, for example in VirtualBox.
+</p>

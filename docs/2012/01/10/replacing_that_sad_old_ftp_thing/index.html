@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Replacing That Sad, Old FTP Thing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Replacing That Sad, Old FTP Thing">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, PHP, OpenSSH">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Replacing That Sad, Old FTP Thing</h1>
+    <p class="date">
+        PHP, OpenSSH | January 10, 2012
+    </p>
+    <p>
+This article was published in <a href="https://www.phparch.com/magazine/2012-2/january/" target="_blank">php[architect]</a> magazine.
+</p>
+
+<p>
+FTP stands for File Transfer Protocol. Everyone uses it, but did you know that it is an old, weird protocol that sends your passwords over the internet in plain text? The good news is that there is a better alternative.
+</p>
+
+<h2>Why is FTP Bad?</h2>
+
+<p>
+FTP is an often used protocol and well known by everyone. In fact, the first FTP standard was <a href="http://tools.ietf.org/html/rfc114" target="_blank">RFC114</a> which was published even before TCP/IP existed. FTP for indirect access and Telnet for direct access became the first two TCP/IP networking applications. We are speaking of an age when there was no internet, and ARPAnet was still a small development environment. Over the years, numbers of subsequent RFCs refined the early version of FTP, and currently, it is the topic of more than fifty RFCs!
+</p>
+
+<p class="quote">
+"The first FTP standard was RFC114 which was published even before TCP/IP existed."
+</p>
+
+<p>
+At the time when FTP was designed, the need for filtering or tight security wasn’t necessary. Therefore both FTP and Telnet send your password and data over the internet in plain text format with no encryption nor security. Obviously, these old-school practices make you vulnerable to eavesdropping, connection hijacking, and other hacker attacks. FTP also doesn’t play nicely with firewalls and has problems working with NAT. FTP connections work on two ports, a control port and a data port. The default control port for FTP is 21. The problem is that the data port is randomly chosen. You can use FTP in two ways, namely passive or active, based on which side of the connection has a firewall problem.
+</p>
+
+<p>
+With active FTP, the remote server makes a new connection back to the client to transfer the requested data. The client chooses a random port on which to receive the data connection and sends the port number to the server over the control port. This is a problem for users attempting to gain access to FTP servers from behind a NAT gateway because the FTP server will initiate the data connection by connecting to the external address of the NAT gateway. The NAT machine will receive this and will drop the packets because it has no mapping for them to the client machine. Some application layer firewalls do know how to work around this, but this still isn’t ideal.
+</p>
+
+<p>
+With passive FTP, the client requests that the server pick a random port on which to listen for the data connection. The server sends the chosen port number to the client over the control port, and the client will connect to this port to transfer data. This may be a problem with the firewall in front of the FTP server, as it will probably block the incoming data connection.
+</p>
+
+<p>
+A common solution for eavesdropping attacks on old protocols like Telnet and FTP is to extend them with support for the Transport Layer Security (TLS) and the Secure Sockets Layer (SSL) cryptographic protocols. In practice, you will need to buy (or self-sign) and install an SSL certificate for your FTP service. My opinion is that security mechanisms should be turned on by default and enforced to the user. With FTPS not being configured by default, this is not the case.
+</p>
+
+<p>
+So, to round up with a general recommendation: use something else in place of FTP.
+</p>
+
+<h2>What is OpenSSH?</h2>
+
+<p>
+The Secure Shell (SSH) protocol is a protocol for secure remote login and other secure network services over an insecure network. The SSH protocol consists of three major components:
+</p>
+
+<ul>
+    <li>a transport layer protocol which provides server authentication, confidentiality, and integrity
+    <li>a user authentication protocol which authenticates the client to the server
+    <li>a connection protocol which multiplexes the encrypted tunnel into several logical channels
+</ul>
+
+<p class="quote">
+"The security-related shortcomings of Telnet made the usage of the protocol drop rapidly in favor of SSH. I think it is about time the same thing happens with FTP."
+</p>
+
+<p>
+Compared with FTP, SSH encrypts all traffic, including passwords, and provides secure tunneling capabilities and several authentication methods. SSH only needs one port, which by default is port 22. The goal of the OpenSSH project is simple: since Telnet, FTP and the like are insecure, all operating systems should ship with support for the SSH protocol included. OpenSSH is developed by the OpenBSD project, and the first code shipped in December 1999. Almost immediately after that, various non-OpenBSD groups became very, very interested. As a result, OpenSSH was ported to Linux and other Unix operating systems. Nowadays, you will find OpenSSH pre-installed on almost every non-Windows server.
+</p>
+
+<p>
+OpenSSH provides the following interesting programs:
+</p>
+
+<ul>
+    <li>ssh, the basic rlogin/rsh-like client program
+    <li>scp, file copy program that acts like rcp
+    <li>sftp, FTP-like program that works over the SSH1 and SSH2 protocols
+    <li>sshd, the daemon that permits you to log in
+    <li>sftp-server, SFTP server subsystem
+</ul>
+
+<p>
+As you can see, OpenSSH provides an SFTP server and client that can be used as a replacement for FTP.
+</p>
+
+<p>
+The security-related shortcomings of Telnet made the usage of the protocol drop rapidly in favor of SSH. I think it is about time the same thing happens with FTP. As a plus, the OpenBSD project is widely known for their focus on security and code correctness. So, why rely on an extra FTP daemon when OpenSSH comes pre-installed with all necessary tools readily available?
+</p>
+
+<h2>Using SFTP</h2>
+
+<p>
+Maybe people stick to their old FTP daemons because they are not familiar enough with OpenSSH. Luckily, OpenBSD is also well known for its quality documentation. One of the most important manual pages is <span class="terminal">man sshd_config</span>. As the manual page states, the sshd_config file lives in /etc/ssh/sshd_config.
+</p>
+
+<p>
+Let’s say you have a server with two websites. The websites live under /var/www/blog.ctors.net and /var/www/shop.ctors.net, and let’s say you have two users on the system named blog and shop. These two users were created using the following commands:
+</p>
+
+<p class="terminal">adduser blog --home /var/www/blog.ctors.net/ --ingroup www-data
+chown -R blog:www-data /var/www/blog.ctors.net/
+adduser shop --home /var/www/shop.ctors.net/ --ingroup www-data
+chown -R shop:www-data /var/www/shop.ctors.net/</p>
+
+<p>
+Adding the users to the www-data group has the advantage that when the user uploads files, these files are immediately in the group www-data. That means you only have to chmod g+w a file or directory to allow write access for the web server itself (assuming that the web server’s group is www-data).
+</p>
+
+<p>
+When an OpenSSH-server is installed, these two users are, by default, able to log in to the server with an SSH client (like Putty). This also means that, by default, they are able to use SFTP. Most modern FTP clients, like FileZilla, have support for SFTP. In FileZilla, in addition to the host/user/password, you also have to provide the port. When you set it to 22, FileZilla will work over SFTP.
+</p>
+
+<p>
+The sftp-server program in OpenSSH is not intended to be called directly, but from sshd using the “Subsystem” option. If you look into /etc/ssh/sshd_config, you will find a line like the one below, which enables SFTP. This should be on by default:
+</p>
+
+<p class="terminal">Subsystem sftp /usr/lib/openssh/sftp-server</p>
+
+<p>
+After logging in with SFTP, the user will be in their home directory, but just like when logging in with SSH, the user will also be able to browse to every part of the system they for which have read permissions. For example, the shop user can go to the blog.ctors.net folder and download the website. This behavior may not be desired.
+</p>
+
+<p>
+Since February 2008, the OpenSSH folks have added an option that enables you to isolate a user into a folder. This was done by adding a chroot (the change root system call) facility to sshd. This is pretty easy to set up and well explained in the manual pages. First of all, you have to change the sftp subsystem to internal-sftp. The internal-sftp is basically the same sftp-server, linked into sshd. With the in-process sftp server, sshd doesn’t need any special chroot configuration (no /dev, no libraries, no statically-linked sftp-server). This eliminates the chroot setup and maintenance burden. To enable internal-sftp, change the sshd_config file as follows:
+</p>
+
+<p class="terminal">#Subsystem sftp /usr/libexec/sftp-server
+Subsystem sftp internal-sftp</p>
+
+<p>
+Next you add rules for SFTP users to the end of the /etc/ssh/sshd_config file:
+</p>
+
+<p class="terminal">Match user blog
+  ForceCommand internal-sftp
+  ChrootDirectory /var/www/blog/
+Match user shop
+  ForceCommand internal-sftp
+  ChrootDirectory /var/www/shop/</p>
+
+<p>
+ForceCommand forces the execution of internal-sftp for that user. As a result, he or she will not be able to log in with regular SSH anymore. You could optionally remove their shells too, because they are of no use anymore:
+</p>
+
+<p class="terminal">usermod -s /bin/false blog
+usermod -s /bin/false shop</p>
+
+<p>
+The ChrootDirectory specifies the pathname of a directory to chroot to after authentication. All components of the pathname must be root-owned directories that are not writeable by any other user or group. The directory /var/www is usually eligible. After the chroot, sshd changes the working directory to the user’s home directory. The most convenient way to set this up is to create a “root-owned, not-writeable by others” folder for the user under /var/www, and move the websites that should be accessible for the user under it.
+</p>
+
+<p class="terminal">mkdir /var/www/blog &amp;&amp; mv /var/www/blog.ctors.net /var/www/blog/
+usermod -d /var/www/blog/blog.ctors.net blog
+mkdir /var/www/shop &amp;&amp; mv /var/www/shop.ctors.net /var/www/shop/
+usermod -d /var/www/shop/shop.ctors.net shop</p>
+
+<p>
+Note that if you make changes to the sshd config file you will have to restart sshd to let it reload its config. The usual command for this is service ssh restart.
+</p>
+
+<p>
+When you set up your SSH like this, because of the enforced internal-sftp, the users are unable to login with SSH. This should be fine because if the user was able to log in, there wouldn’t be any basic binaries like ls or cd available in the chroot anyway. It should be possible to set up SFTP in combination with SSH login, but you have to build the chroot yourself. As building a safe chroot yourself is somewhat tricky and it’s quite easy to make security mistakes, I just don’t do it at all.
+</p>
+
+<h2>Scripting SFTP</h2>
+
+<p>
+Something that is often used is FTP in bash scripts.
+You can do something like this in a bash script:
+</p>
+
+<p class="terminal">ftp -n 192.168.1.10 &lt;&lt; ENDFTP
+user erp_user secretpassword
+cd exports
+get some_data.xml
+bye
+ENDFTP</p>
+
+<p>
+I think it’s obvious what that script does. A user named erp_user will connect to a remote server and download an XML export. The technique with &lt;&lt; ENDFTP is called heredocs. If you never heard of this, you should check it out; PHP itself also has support for heredocs. I added a direct link to the relevant documentation in the Related URLs section.
+</p>
+
+<p>
+You can use SFTP within bash, but you will have to set up password-less SSH for the user. This is actually very easy. First, you generate a private/public key pair on the local server using the ssh-keygen command. After that, the public key needs to beinstalled on the remote server as an authorized key. You can do this with the ssh-copy-id command.
+</p>
+
+<p class="terminal">ssh-keygen -t dsa -f ~/.ssh/id_rsa
+ssh-copy-id erp_user@192.168.1.10</p>
+
+<p>
+Next time you try to log in to the remote server, it will not prompt for your password. If the erp_user is in an SFTP chroot, you can’t use ssh-copy-id. Alternatively, you can log in to the remote server with a privileged user and copy the contents of your ~/.ssh/id_rsa.pub file into the remote user’s ~/.ssh/authorized_keys file. Setting up password-less SSH is really that simple.
+</p>
+
+<p>
+You can now rewrite the above bash script to use SFTP instead:
+</p>
+
+<p class="terminal">sftp -b /dev/stdin erp_user@192.168.1.10 &lt;&lt; ENDFTP
+cd exports
+get some_data.xml
+bye
+ENDFTP</p>
+
+<p>
+When developing with PHP, you will find that there is support for SSH/SFTP too. There is a PECL module that provides libssh2 bindings. It comes as a package on Fedora (php-pecl-ssh2) and Ubuntu (libssh2-php). I have added links to the relevant PHP documentation of SSH and SFTP in the Related URLs section. To use SFTP, you will first have to establish an SSH connection. After that, you can use the function ssh2_sftp() to request the SFTP subsystem from the server.
+</p>
+
+<p class="terminal">$conn = ssh2_connect('blog.ctors.net');
+ssh2_auth_password($conn, 'blog', 'secretpassword');
+$sftp = ssh2_sftp($conn);</p>
+
+<p>
+As putting a plain-text password in a script is never a good idea, you can alternatively use the function ssh2_auth_pubkey_file() to log in using password-less SSH. Remember that you do have to generate and install your public key first, just like I described above.
+</p>
+
+<p>
+When the SFTP subsystem is initialized, you can go ahead and read or write a file. The code below is a simple example of downloading the index.php file from the homepage of the shop:
+</p>
+
+<p class="terminal">$stream = fopen("ssh2.sftp://$sftp/shop/index.php", 'r');
+$fd = fopen('/home/tvl/shop_index.php', 'w');
+file_put_contents(
+  '/home/tvl/shop_index.php',
+  fread($stream, filesize("ssh2.sftp://$sftp/~/shop/index.php"))
+);
+fclose($fd);
+fclose($stream);</p>
+
+<p>
+And here is a simple example of writing a new index.php file:
+</p>
+
+<p class="terminal">$stream = fopen("ssh2.sftp://$sftp/shop/index.php", 'w');
+fwrite($stream, file_get_contents('/home/tvl/shop_index.php'));
+fclose($stream);</p>
+
+<h2>Conclusion</h2>
+
+<p>
+This article should cover most FTP use-cases and should provide equivalent solutions for them using SFTP. I hope that by writing this article, I will at least reach some people and make them realize that FTP should not be part of their new server setup anymore. Feel free to send me a tweet or an email if you want to discuss this with me any further. If you need more information, you can find the OpenSSH mailing lists at http://openssh.org/list.html. Alternatively, you can take a look at this list of resources:
+</p>
+
+<ul>
+    <li><a href="http://www.openssh.org/manual.html" target="_blank">http://www.openssh.org/manual.html</a>
+    <li><a href="http://tools.ietf.org/html/rfc4251" target="_blank">http://tools.ietf.org/html/rfc4251</a>
+    <li><a href="http://undeadly.org/cgi?action=article&amp;sid=20080220110039" target="_blank">http://undeadly.org/cgi?action=article&amp;sid=20080220110039</a>
+    <li><a href="http://www.openbsd.org/faq/pf/ftp.html" target="_blank">http://www.openbsd.org/faq/pf/ftp.html</a>
+    <li><a href="http://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc" target="_blank">http://www.php.net/manual/en/language.types.string.php#language.types.string.syntax.heredoc</a>
+    <li><a href="http://php.net/manual/en/book.ssh2.php" target="_blank">http://php.net/manual/en/book.ssh2.php</a>
+    <li><a href="http://php.net/manual/en/function.ssh2-sftp.php" target="_blank">http://php.net/manual/en/function.ssh2-sftp.php</a>
+</ul>
+
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

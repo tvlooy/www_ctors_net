@@ -1,0 +1,60 @@
+<!--
+creation_date: 2015-02-03
+permalink: vagrant_shell_provisioning
+title: Vagrant met shell provisioning
+keywords: Vagrant, Bash
+-->
+<p>
+<img src="/img/post/shell_learning.jpg" alt="Learn the shell"
+     style="float: left; margin-right: 15px; width: 200px;">
+</p>
+
+<p>Dit artikel is geschreven voor Intracto en verscheen voor het eerst op de <a href="http://www.intracto.com/nl/blog/vagrant-shell-provisioning" target="_blank">Intracto blog</a> op Februari 3, 2015.</p>
+
+<p><a href="https://www.vagrantup.com/">Vagrant</a> maakt het mogelijk om automatisch virtuele machines aan te maken, te configureren en reproduceren. Die virtuele machines kunnen van verschillende types zijn, zoals bijvoorbeeld <a href="https://www.virtualbox.org/">VirtualBox</a>.</p>
+
+<p>Het grote voordeel van het werken met Vagrant is dat je <strong>je developmentomgeving identiek kan maken aan productie</strong>. Op deze manier kan een developer werken op een omgeving met dezelfde PHP-versie/MySQL/OS versie.. Als het project moeilijk op te zetten packages nodig heeft, worden deze nu automatisch ge&iuml;nstalleerd en moet de developer zich hier geen zorgen over maken.</p>
+
+<h2>Hoe Intracto met Vagrant werkt</h2>
+
+<p>De sysadmins van Intracto voorzien de lege basis &quot;boxen&quot;, daar gebruiken we <a href="https://github.com/jedi4ever/veewee">VeeWee</a> voor. Vagrant downloadt de box de eerste keer eerst van het netwerk en kent er IP-adres(sen), CPU's, memory etc. aan toe. Dit kan je zelf configureren in het bestand "Vagrantfile". Daarna start Vagrant de provisioning en kan je de box gebruiken:</p>
+<script src="https://gist.github.com/tvlooy/fd9ca6eecb7361bd188c.js"></script>
+
+<p>Vagrant start de vm (virtual machine) zonder GUI (vb: VirtualBox), je kan ook dit configureren in de "Vagrantfile".</p>
+<script src="https://gist.github.com/tvlooy/0703523bf6ad8a06c820.js"></script>
+
+<h2>Drive mapping</h2>
+
+<p>In de "Vagrantfile" staat ook de VirtualBox drive mapping. De directory /vagrant in het guest-systeem is dezelfde als de directory waar je "Vagrantfile" zich op je host systeem bevindt. Zo kan je coderen op het host-systeem en is de code automatisch up-to-date in de guest. Deze mapping gebeurt voor elk besturingssysteem op een andere manier:</p>
+
+<ul>
+  <li>NFS op <strong>Linux</strong> en <strong>Mac</strong>.
+  <li>Op <strong>Windows</strong> werkt dit via VirtualBox shared folders en is dit onwerkbaar traag. Voor Windows zijn er wel workarounds (rsync-auto, NFS for Windows, ...)
+</ul>
+
+<p>Het is dus duidelijk dat de drive mapping in Linux en Mac superieur is ;-)</p>
+
+<h2>Provisioning</h2>
+
+<p>Provisioning is het installeren van alle software (PHP / Apache / MySQL) in de box. Er bestaan enkele provisioning oplossingen (<a href="http://puppetlabs.com/" target="_blank">Puppet</a>, <a href="https://www.chef.io/" target="_blank">Chef</a>, <a href="http://www.ansible.com/home" target="_blank">Ansible</a>). Deze zijn vooral interessant om meerdere productiesystemen mee te onderhouden, maar betekenen toch een beetje overkill voor Vagrant. Bovendien is er een leercurve en hebben die provisioners ook altijd hun dependencies en quirks.</p>
+
+<p>Bij Intracto gebruiken we <strong>shell provisioning</strong> voor Vagrant. In de map "shell_provisioning" bevindt zich een script run.sh dat de dependencies zal installeren. Deze dependencies zijn shell scripts in de "module" folder en worden in volgorde uitgevoerd. Als er configuratie nodig is zal deze zich in de "config" folder bevinden.</p>
+
+<p>Je zet de commando's die je normaal ook zou intypen om iets te installeren gewoon in een module shell script. Dit wordt dan uitgevoerd bij "vagrant up".</p>
+
+<h2>Wat zit er in?</h2>
+
+<p>Vagrant zit automatisch in al onze projecten en is altijd volledig geoptimaliseerd voor onze Drupal- en Symfonyprojecten. Er is dan ook steeds een basis LAMP stack aanwezig.</p>
+<script src="https://gist.github.com/tvlooy/d45f0b7fbcd7401a1306.js"></script>
+
+<p><strong>PhpMyAdmin</strong> is bereikbaar op /phpmyadmin, <strong>Roundcube webmail </strong>is bereikbaar op /roundcube. Alle mails die verstuurd worden op het systeem worden onderschept en in de Roundcube webmail afgeleverd. Zo kan je niet per ongeluk testmails naar echte klanten sturen.</p>
+
+<p>We hebben een Intracto <strong>BitBucket repository</strong> waar je extra modules kan downloaden, zoals bijvoorbeeld Tomcat / Solr, IP tables, Memcache, Gearman, node.js, ...</p>
+
+<h2>Uitbreiden</h2>
+
+<p>Om te testen of de provisioning volledig goed werkt zal je een "vagrant destroy &amp;&amp; vagrant up" moeten uitvoeren, we hebben namelijk geen updatefunctionaliteit. Dat is een beetje jammer maar eigenlijk ook gewenst. Een Vagrant box mag geen eigen leven leiden dus is het niet erg om deze eens opnieuw te bouwen. Bovendien duurt dat maar een paar minuutjes en ben je zeker dat een clean setup werkt.</p>
+
+<h2>Conclusie</h2>
+
+<p>Vagrant is een goed alternatief voor de klassieke WAMPP / XAMPP / MAMPP setups. Je kan snel automatisch een project opzetten zonder zelf packages en services te moeten configureren. Shell provisioning is eenvoudig, maar <a href="http://nl.wikipedia.org/wiki/KISS-principe" target="_blank">keep it simple</a>, zeker <a href="http://c2.com/cgi/wiki?YouArentGonnaNeedIt" target="_blank">if you ain't gonna need</a> advanced features.</p>

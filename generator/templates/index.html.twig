@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+{% block title %}Blog tvlooy{% endblock %}
+{% block meta %}
+    <meta name="description" content="Blog tvlooy">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, {{ keywords }}">
+{% endblock %}
+{% block article %}
+    <div class="title">Blog tvlooy</div>
+    <h1>The adventures of tvlooy</h1>
+    <ul class="postlist">
+        {% for post in posts %}
+        <li>
+            <a href="/{{ post.creation_date|date('Y/m/d') }}/{{ post.permalink }}">{{ post.title }}</a>
+            <span class="blogdate">{{ post.creation_date|date('M d, Y') }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

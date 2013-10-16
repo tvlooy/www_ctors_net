@@ -1,0 +1,279 @@
+/* I feel sorry for you */
+@font-face {
+    font-family: 'Comic Sans MS';
+    src: url('fonts/ComicSansMS.woff2') format('woff2'),
+        url('fonts/ComicSansMS.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Fatboy Slim BLTC BRK';
+    src: url('fonts/FatboySlimBLTCBRK.woff2') format('woff2'),
+    url('fonts/FatboySlimBLTCBRK.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    margin-top: 0px;
+    background: #036;
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #012346;
+}
+
+header {
+    margin: 0px auto;
+    display: block;
+    max-width: 1024px;
+    font: 33px 'Fatboy Slim BLTC BRK';
+    color: #9cf;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    text-align: right;
+    text-indent: 8px;
+    direction: rtl;
+}
+
+nav {
+    font-family: 'Comic Sans MS';
+    margin: 0px auto;
+    background-color: #ccc;
+}
+
+article {
+    text-align: left;
+    background-color: #f6f6f6;
+    vertical-align: top;
+    padding-bottom: 10px;
+    border-width: 0 0 6px 0;
+    border-color: #9cf;
+    border-style: solid;
+    word-wrap: break-word;
+}
+
+footer {
+    font-family: 'Comic Sans MS';
+    margin: 0px auto;
+    padding-top: 3px;
+    display: block;
+    max-width: 1024px;
+    font-size: 13px;
+    color: #9cf;
+}
+
+div.title {
+    font-family: 'Comic Sans MS';
+    margin-top: 0px;
+    margin-bottom: 0px;
+    background-color: #9cf;
+    border-width: 0px 0px 6px 0px;
+    border-color: #999;
+    border-style: solid;
+    color: #036;
+    font-weight: bold;
+}
+
+h1, h2 {
+    font-family: 'Comic Sans MS';
+    font-weight: bold;
+    font-size: 16px;
+    margin: 18px 18px 0px 14px;
+    border-bottom: 1px dotted #aaa;
+    padding: 0px 0px 0.2em 0px;
+}
+
+p.date {
+    font-size: 10px;
+    text-align: right;
+    margin: 3px 18px 0px 0px;
+    text-align: right;
+    font-weight: bold;
+}
+
+p, div.gist, div.block {
+    margin: 10px 18px 20px 14px;
+}
+
+    p.terminal, span.terminal {
+        color: #9FC782;
+        background: #333;
+        font-size: 13px;
+        font-family: monospace;
+        white-space: pre-wrap;
+    }
+
+    span.terminal {
+        padding: 0px 2px;
+    }
+
+    p.terminal {
+        padding: 2px 5px;
+    }
+
+    p.quote {
+        border: 1px dotted #aaa;
+        padding: 5px 10px;
+        font-style: italic;
+        font-family: serif;
+        color: #666;
+        background: #fff;
+        display: flex;
+    }
+
+a {
+    outline: none;
+}
+
+article a {
+    /* Use the color of the year ffs! https://www.pantone.com/color-of-the-year-2018 */
+    color: #604c8d;
+    /* 2017 color */
+    /* color: #638b46; */
+    padding: 0 2px;
+}
+
+    article a:hover {
+        background-color: #604c8d;
+        color: #fff;
+        /* 2017 color */
+        /* color: #036; */
+        /* background-color: #9cf; */
+    }
+
+ul.postlist li {
+    line-height: 22px;
+}
+
+nav a {
+    background: #012346;
+    color: #9cf;
+    display: block;
+    font-weight: bold;
+    padding: 0.5em;
+    text-decoration: none;
+}
+
+    nav a:hover {
+        color: #F6F6F6;
+    }
+
+span.blogdate {
+    float: right;
+}
+
+/* desktop */
+@media screen and (min-width: 901px) {
+    div.title {
+        border-top-right-radius: 10px;
+        font-size: 40px;
+        padding: 0px 0px 0px 14px;
+        line-height: 80px;
+        height: 80px;
+    }
+
+    footer {
+        text-align: right;
+    }
+
+    nav {
+        display: table-cell;
+        width: 160px;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        border-width: 0 0 6px 0;
+        border-color: #9cf;
+        border-style: solid;
+    }
+
+    li {
+        margin-right: 80px;
+    }
+
+    nav img.tvl {
+        border-width: 0px 0px 6px 0px;
+        border-color: #999;
+        border-style: solid;
+        border-top-left-radius: 10px;
+    }
+
+    section {
+        display: table;
+        margin: 0px auto;
+        box-shadow: 0 0 10px #9cf;
+        border-radius: 10px;
+    }
+
+    article {
+        display: table-cell;
+        width: 864px;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        height: 500px;
+    }
+
+    nav a {
+        margin-bottom: 4px;
+        background: #999999;
+        color: #f6f6f6;
+    }
+    nav a:hover {
+        color: #036;
+    }
+}
+
+/* mobile */
+@media screen and (max-width: 900px) {
+    span.blogdate {
+        display: none;
+    }
+
+    nav {
+        background: #036;
+    }
+
+    nav a {
+        display: inline-block;
+        text-align: center;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        box-shadow: 1px -1px 2px #9cf;
+        margin-left: 5px;
+        padding: 0.5em 2em;
+    }
+
+    nav img.tvl {
+        display: none;
+    }
+
+    header {
+        text-align: center;
+    }
+
+    footer {
+        text-align: center;
+    }
+
+    body {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+
+    div.title {
+        font-size: 30px;
+        text-align: center;
+        padding: 0;
+        line-height: 50px;
+        height: 48px;
+    }
+
+    li {
+        margin-right: 18px;
+    }
+
+    article img {
+        max-width: 100%;
+    }
+}
+

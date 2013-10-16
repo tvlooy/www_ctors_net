@@ -1,0 +1,74 @@
+<!--
+creation_date: 2014-07-17
+permalink: vmware_to_virtualbox
+title: Migrate VMWare box to VirtualBox
+keywords: VMWare, VirtualBox
+-->
+<p>
+VMware Player is only free for personal non-commercial use. It's not so hard to migrate your VMWare box to VirtualBox, but it you used a SCSI disk in VMWare, you will see the error below when trying to run converted box in VirtualBox:
+</p>
+
+<p class="terminal">Could not find a storage controller named 'SCSI Controller'."</p>
+
+<p>
+The instructions below will guide you through the converting process.
+</p>
+
+<h2>VMWare</h2>
+
+<ul>
+<li>Boot the VM
+<li>Uninstall vmware tools
+<li>Shutdown
+<li>Edit VM settings -> remove the HD
+<li>Edit the_machine.vmdk
+<li>change ddb.adapterType from "buslogic" or "lsilogic" to "ide"
+<li>Edit VM settings -> add an HD, type IDE from existing file the_machine.vmdk
+<li>Boot the VM
+<li>Shutdown
+</ul>
+
+<p>
+Now you can convert the box from VMWare to Open Virtualization Format.
+</p>
+
+<p class="terminal">$ ovftool -o the_machine.vmx the_machine.ovf
+Opening VMX source: the_machine.vmx
+Opening OVF target: the_machine.ovf
+Writing OVF package: the_machine.ovf
+Transfer Completed
+                  
+Completed successfully</p>
+
+<h2>VirtualBox</h2>
+
+<p>
+The last step is to import the OFV in VirtualBox and install guest additions.
+</p>
+
+<ul>
+<li>File -> import appliance -> the_machine.ovf
+<li>VM settings -> storage -> add attachment -> CD drive
+<li>Boot the VM
+<li>install guest additions from CD
+</ul>
+
+<p>
+And you're ready to uninstall VMWare play. !
+</p>
+
+<p class="terminal">$ sudo vmware-installer -u vmware-player</p>
+
+<h2>Edit: resize disk</h2>
+
+<p>
+Note that you can't resize a VMDK disk. You will have to convert it to VDI first and then resize it (size in MB). (I only tried expand) Eg:
+</p>
+
+<p class="terminal">VBoxManage clonehd the_machine.vmdk the_machine.vdi --format VDI --variant Standard</p>
+
+<p class="terminal">VBoxManage modifyhd the_machine.vdi --resize 50000</p>
+
+<p>
+Next you can use your operating system to resize the partition. Eg: with Gparted on Linux systems or "administrative tools" -> "disk management" in Windows.
+</p>

@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block title %}Blog tvlooy: {{ title }}{% endblock %}
+{% block meta %}
+    <meta name="description" content="{{ title }}">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, {{ keywords }}">
+{% endblock %}
+{% block article %}
+    <div class="title">Blog tvlooy</div>
+    <h1>{{ title }}</h1>
+    <p class="date">
+        {{ keywords }} | {{ creation_date|date('F d, Y') }}
+    </p>
+    {{ body|raw }}
+{% endblock %}

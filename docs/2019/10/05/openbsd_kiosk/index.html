@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Building an OpenBSD kiosk</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Building an OpenBSD kiosk">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, ">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Building an OpenBSD kiosk</h1>
+    <p class="date">
+         | October 05, 2019
+    </p>
+    <p>
+Install OpenBSD the usual way. Add an extra user named "kiosk" during install.
+</p>
+
+<p>
+Configure doas:
+</p>
+
+<p class="terminal">echo 'permit nopass kiosk' > /etc/doas.conf
+</p>
+
+<p>
+Install Chromium:
+</p>
+
+<p class="terminal">pkg_add -i chromium
+</p>
+
+<p>
+Log in as user kiosk and add the script <span class="terminal">/home/kiosk/chrome.sh</span>. Make this script executable. See below for the content of the script, replace "&lt;your_homepage&gt;" with the homepage you want to show"
+</p>
+
+<p class="terminal">while [ true ]; do
+    /usr/local/bin/chrome --kiosk --no-default-browser-check  --disable-session-crashed-bubble https://&lt;your_homepage&gt;
+done
+</p>
+
+<p>
+Add this line to your <span class="terminal">/home/kiosk/.xinitrc</span>:
+</p>
+
+<p class="terminal">/home/kiosk/chrome.sh &
+exec cwm
+</p>
+
+<p>
+Add this line to your <span class="terminal">/home/kiosk/.profile</span>:
+</p>
+
+<p class="terminal">if [ -z "`pgrep xinit`" ]; then
+    xinit -- -nocursor -nolisten tcp
+fi
+</p>
+
+<p>
+Add this line to your <span class="terminal">/etc/rc.local</span>:
+</p>
+
+<p class="terminal">su - kiosk
+</p>
+
+<p>
+Next, reboot and your kiosk is ready!
+</p>
+
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

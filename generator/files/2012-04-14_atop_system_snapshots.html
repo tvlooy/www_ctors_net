@@ -1,0 +1,45 @@
+<!--
+creation_date: 2012-04-14
+permalink: atop_system_snapshots
+title: atop - system snapshots
+keywords: atop, Linux
+-->
+<p>
+I knew atop existed, but I never saw it's advantages and I was unable to use it properly. That changed some time ago, when a colleague of mine showed me the "snapshot" capabilities of atop.
+</p>
+
+<p>
+From the atop manpage: Atop is an ASCII full-screen performance monitor, similar to the top command, but atop only shows the active system-resources and processes, and only shows the deviations since the previous interval.
+</p>
+
+<p>
+Atop can be installed on Debian/Ubuntu from packages. Debian still has version 1.23, Ubuntu already has 1.26. 1.23 is still limited to 80 column output, so that sucks a little. I don’t know why Debian is still on 1.23.
+</p>
+
+<h2>Service</h2>
+
+<p>
+You can run atop from the commandline and watch the current system status. I think there are far better things for that, like htop, dstat and plain top. But, atop actually runs as a service. Take a look at the daemon arguments in the file <span class="terminal">/etc/init.d/atop</span>:
+</p>
+
+<p class="terminal">DARGS="-a -w /var/log/atop.log 600"</p>
+
+<p>
+Every 10 minutes (600), atop will write a snapshot of all processes to the file <span class="terminal">/var/log/atop.log</span>. The logfiles will usually be <span class="terminal">logrotated</span>. This gives you a "snapshots" of your system. In case of a crash, you can go back and look what processes were running before the crash.
+</p>
+
+<h2>Commands</h2>
+
+<p>
+Atop has an extensive manual page. But for your convenience, here is a small subset of the commands that I actually use. Start atop with a raw file as argument.
+</p>
+
+<p class="terminal">atop -r /var/log/atop.log.2.gz</p>
+
+<p>
+Use the key <span class="terminal">"t"</span> to browse to the next sample and <span class="terminal">"T"</span> to go back. If you have a lot of processes, use the key <span class="terminal">ctrl+f</span> to go to the next page and <span class="terminal">ctrl+b</span> to go back. The key <span class="terminal">"p"</span> groups processes by name (eg: apache2 is displayed as one process). The <span class="terminal">"g"</span> key switches back to generic output, which is the default when you start atop.
+</p>
+
+<p>
+Again, all the fields on the display are explained in the manual page, just read it. So, atop really is a very nice tool that can really help you understand what happens on a system to analyze strange behavior.
+</p>

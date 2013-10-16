@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Dealing with e-mail in a development environment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Dealing with e-mail in a development environment">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Postfix, Roundcube, Dovecot">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Dealing with e-mail in a development environment</h1>
+    <p class="date">
+        Postfix, Roundcube, Dovecot | January 18, 2013
+    </p>
+    <p>
+This article was written for Intracto and first appeared on the <a href="http://www.intracto.com/blog/dealing-e-mail-development-environment" target="_blank">Intracto blog</a> on January 18, 2013.
+</p>
+
+<p>
+If you build web applications, chances are that they will send e-mail. Think contact forms, order confirmations, etc. On a developer machine however, you usually don't want this e-mail to be delivered to a real mailbox. You could use MailCatcher to solve this problem, but there are also other solutions, like using your current MTA in a smart way.
+</p>
+
+<h2>MailCatcher</h2>
+
+<p>
+<a href="https://github.com/sj26/mailcatcher" target="_blank">MailCatcher</a> catches all e-mail sent on a system, and stores it for display. You can read from the website: "MailCatcher runs a super simple SMTP server which catches any message sent to it to display in a web interface. Run mailcatcher, set your favourite app to deliver to smtp://127.0.0.1:1025 instead of your default SMTP server, then check out http://127.0.0.1:1080 to see the mail that's arrived so far."
+</p>
+
+<p>
+This behaviour is useful on a developer machine, where you want to send e-mails, but you don't want them to arrive in your mailbox, or in your spam filter, or even worse, in a real customer's mailbox. The downside is that, out of the box, you are running an extra service on port 1080 and you have to deliver the e-mail with SMTP on port 1025. That means you need to fiddle with your project's e-mail settings, or with the php.ini.
+</p>
+
+<h2>Postfix</h2>
+
+<p>
+Wouldn't it be great if you could just tweak your current MTA a bit to catch all e-mail and deliver this to a default mailbox on the system? Sure! At Intracto we use Vagrant with Puppet for some projects and we choose to keep using our well-known Postfix to handle e-mail. It’s easy to configure Postfix to make sure no e-mail leaves the box. Instead, all e-mail, regardless the sender or the receiver, will be delivered to the local vagrant user. The mailbox of the vagrant user can be read with a combination of Dovecot and Roundcube. Internally, we call this an e-mail collect. This is a clean and simple solution and there is no need to fiddle with your e-mail settings.
+</p>
+
+<p>
+The way we set up the e-mail collect for our <a href="http://www.secretsantaorganizer.com/" target="_blank">SecretSanta project</a> can be found on <a href="https://github.com/Intracto/Puppet/blob/master/mailcollect/manifests/init.pp" target="_blank">GitHub</a>. To summarize the setup, we install packages 'postfix', 'postfix-pcre', 'dovecot-imapd' and 'roundcube-core'. The following lines were added to the default Postfix /etc/postfix/main.cf:
+</p>
+
+<p class="terminal">virtual_alias_domains =
+virtual_alias_maps = pcre:/etc/postfix/virtual_forwardings.pcre
+virtual_mailbox_domains = pcre:/etc/postfix/virtual_domains.pcre
+home_mailbox = Maildir/</p>
+
+<p>
+Then, we use pcre (Perl Compatible Regular Expressions) to configure virtual aliases:
+</p>
+
+<p class="terminal">echo "/@.*/ vagrant" > /etc/postfix/virtual_forwardings.pcre
+echo "/^.*/ OK" > /etc/postfix/virtual_domains.pcre</p>
+
+<p>
+Dovecot works out of the box and Roundcube was enabled on /roundcube in Apache2. You can then just use the default vagrant user to log into the mailbox. We did change the following settings in the default Roundcube /etc/roundcube/main.inc.php to make it a bit easier to work with:
+</p>
+
+<p class="terminal">$rcmail_config['default_host'] = array('localhost');
+$rcmail_config['list_cols'] = array('subject', 'from', 'to', 'date', 'size', 'flag', 'attachment');
+$rcmail_config['show_images'] = 2;
+$rcmail_config['create_default_folders'] = TRUE;</p>
+
+<h2>Conclusion</h2>
+
+<p>
+While I think MailCatcher is a very cool project and our Puppet modules are still a work in progress, we are very happy with our Postfix / Roundcube setup right now and we don't plan to replace it anytime soon. For now, I just liked to share this small insight about our development and deployment setup. I'm always curious for your thoughts and your experiences, so please feel free to leave a comment, or talk to us at <a href="http://puppetcampghent2013.eventbrite.com/" target="_blank">Puppet Camp 2013 Ghent</a> which we will most likely be attending.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

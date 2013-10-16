@@ -1,0 +1,64 @@
+<!--
+creation_date: 2015-05-16
+permalink: apache2_vhost_to_nginx
+title: Migrating Apache2 vhost configuration to Nginx
+keywords: Nginx, Apache
+-->
+<p>
+This article was written for Intracto and first appeared on the <a href="http://www.intracto.com/nl/blog/migrating-apache2-webserver-to-nginx" target="_blank">Intracto blog</a> on May 16, 2015.
+</p>
+<h2>Why we switched?</h2>
+
+<p>We run Apache with it's PHP module mod_php by default and it works fine. For some projects we prefer php-fpm to have more control and less overhead.</p>
+
+<p><strong>Mod_php</strong> uses more memory per Apache child. Even when serving assets like js, css images, ... it will load the PHP runtime in the process. Also, with mod_php all PHP is executed as the user running Apache (eg: www-data), and you only have 1 PHP version available.</p>
+
+<p><strong>Nginx doesn't have a PHP module </strong>and requires a CGI backend like php-fpm (FastCGI Process Manager). FPM has a way to gain more control over users, permissions, limit workers, PHP versions, ... by configuring pools. Unlike with Apache, this is accomplished with no extra modules and easy to setup. Because it's CGI, only the PHP calls will arrive in FPM, the rest (eg: the assets) will be served by the webserver.</p>
+
+<p>FPM can be used with Apache or with Nginx. Apache has the <strong>advantage of being well known by many people</strong>, and it supports <strong>.htaccess</strong>, which I will talk about later on. If we use FPM, it's currently with Nginx. The reason why we avoid Apache is because we are using Debian 7 with Apache 2.2 from packages. 2.2 needs the fastcgi wrapper for FPM which we like to avoid.</p>
+
+<p>Debian 8 will ship with Apache 2.4, which has native FPM support. So, <strong>our future setups will most likely default to Apache 2.4 with PHP FPM </strong>to have the best of both worlds.</p>
+
+<h2>Apache vs Nginx configuration differences</h2>
+
+<p>When migrating a website from <strong>Apache2 to Nginx</strong>, obviously the configuration syntax will differ and there is porting work to do.</p>
+
+<p>For example, in Apache2, directory indexes are disabled with Options -Indexes. In Nginx, directory indexes are disabled with autoindex off. But there are more fundamental differences than this one.</p>
+
+<p><strong>Apache2 has AllowOverride</strong> that enables an option to override vhost configuration from within .htaccess files. Nginx doesn't have this. If AllowOverride is off, the content of all .htaccess files needs to move to the Apache2 (or Nginx) vhost configuration. Actually, always turning off AllowOverride in Apache2 is good practice because it's disk I/O intensive.</p>
+
+<p>Legacy PHP codebases can make heavy use of superglobals like $_SERVER. In Apache2, SERVER_NAME will contain the host name that was typed into the browser, but in Nginx it will always contain the first server_name from the vhost configuration. Changing this to HTTP_HOST works, but remember that this comes from a user supplied header and so it is insecure. It's good practice to always use an abstraction layer like the Symfony2 HttpFoundation, because this will always return the information in a webserver independent and secure way.</p>
+
+<p>Rewriting URL's is also different in Nginx. In Apache2 this is handled by <strong>mod_rewrite</strong> and configured with, for example, a set of RewriteCond / RewriteRule rules. These rules can be translated to Nginx configuration as a set of if statements. But, some rewrites are better translated to try_files and locations.</p>
+
+<p>This example Apache2 config:</p>
+<script src="https://gist.github.com/tvlooy/2fd3cf54424c844a32b2.js"></script>
+
+<p><span>Would translate to this Nginx config:</span></p>
+<script src="https://gist.github.com/tvlooy/e1abab92a5829a7300f3.js"></script>
+
+<p><span>To match URL /foo in Apache2, the rule is <strong>^foo$</strong>, but in Nginx the slash is required, like <strong>^/foo$.</strong></span></p>
+
+<p>QSA in mod_rewrite means that the query string (eg: ?foo=1&amp;bar=2) should be appended to the rewritten rule. In Apache2, this option has to be specified. In Nginx this is the default. If query string append is not desired, append a ? to the rewritten URL. For example:</p>
+
+<p class="terminal">rewrite &quot;^/foo$&quot; /bar? break;</p>
+
+<p><span>Note that in try_files, the query string is not appended, so if you try_files $uri /web/$uri; it does not append the query string. It has to be try_files $uri /web/$uri?$args;.</span></p>
+
+<p>NC in mod_rewrite means that the rewrite rule is case insensitive. If an Nginx rewrite has to be case insensitive, the regex match has to be prefixed with (?i). For example:</p>
+
+<p class="terminal">rewrite &quot;(?i)^/foo$&quot; /bar? break;</p>
+
+<p>L in mod_rewrite means that it has to stop processing rules and start the next iteration (start matching all rules again from top). In Nginx the last keyword means the same.</p>
+
+<p>In mod_rewrite you can specify<strong> R=301</strong> or <strong>R=302 </strong>for permanent or temporary redirects. Nginx uses permanent and redirect for permanent or temporary redirects instead of last.</p>
+
+<p>If Apache2 has to stop on a rule, it should be instructed with END. In Nginx this is break.</p>
+
+<h2>Conclusion</h2>
+
+<p>These are some of the things I can remember from a recent migration. I'm not in favor of any webserver.</p>
+
+<p>Sticking with Apache is definitely an option in most cases, but mind that the configuration also changed slightly between version 2.2 and 2.4.</p>
+
+<p>If you want to know more about the architectural differences between Nginx and Apache you should definitely read<a href="http://www.aosabook.org/en/nginx.html" target="_blank"> the Nginx chapter of the architecture of open source applications volume 2 book</a>.</p>

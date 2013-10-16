@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Installing PhpStorm on Ubuntu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Installing PhpStorm on Ubuntu">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, PhpStorm, Linux">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Installing PhpStorm on Ubuntu</h1>
+    <p class="date">
+        PhpStorm, Linux | February 10, 2012
+    </p>
+    <p>
+This is about how to install PhpStorm 3.0.2 on Ubuntu 11.10 with Oracle JRE 1.7.0. The reason for this is that PhpStorm doen’t like the OpenJDK for some reason and Ubuntu doesn’t have the Oracle JRE inside it’s repositories anymore (Oracle being a jerk). Some manual work is required which may discourage beginners. The steps below show that it’s not that hard to configure at all.
+</p>
+
+<h2>Downloads</h2>
+
+<p>
+A 30 day trial of PhpStorm can be downloaded at the JetBrains website. The next thing you need to download is the Oracle JRE, get it from their website.
+</p>
+
+<h2>Extract</h2>
+
+<p>
+When you have both <span class="terminal">PhpStorm-3.0.2.tar.gz</span> and <span class="terminal">jre-7u2-linux-x64.tar.gz</span> in your ~/Downloads folder, you can extract them. I keep tool installations in my ~/Documents/tools and things like the JRE in /opt. I extracted them like this:
+</p>
+
+<p class="terminal">$ tar xzvf ~/Downloads/PhpStorm-3.0.2.tar.gz -C ~/Documents/tools
+$ sudo mkdir /opt/java
+$ sudo tar xzvf ~/Downloads/jre-7u2-linux-x64.tar.gz -C /opt/java</p>
+
+<h2>Oracle JRE as default</h2>
+
+<p>
+Next up, I added the Oracle JRE as an alternative option in Ubuntu. The second commands sets the Oracle JRE as default selection. For the last command, you can also use <span class="terminal">sudo update-alternatives --config java</span> and manually select one. You can also use that last command if you want to switch back to OpenJDK as the default.
+</p>
+
+<p class="terminal">$ sudo update-alternatives --install "/usr/bin/java" "java" "/opt/java/jre1.7.0_02/bin/java" 1
+$ sudo update-alternatives --set java /opt/java/jre1.7.0_02/bin/java</p>
+
+<h2>PhpStorm in Unity launcher</h2>
+
+<p>
+For some crazy reason, it seems impossible to just add your own launchers to the Unity launcher menu. Whatever reason, just <span class="terminal">apt-get install alacarte</span> and run alacarte from your terminal. Here you can add a new item for PhpStorm. The icon (webide.png) and launcher (phpstorm.sh) are both in your ~/Documents/tools/PhpStorm-111.296/bin folder.
+</p>
+
+<p>
+Then open the Ubuntu "dash home" thing (press windows key) and type "PhpStorm". Drag that icon to your Unity launcher menu. I for one hope that Canonical improved this in the 12.04 LTS release.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!--
+creation_date: 2015-07-22
+permalink: openbsd_usb_install_and_patch
+title: Install OpenBSD from USB and apply patches
+keywords: openbsd
+-->
+<h2>Create USB installer</h2>
+
+<p>
+This are instructions for OpenBSD 5.7. First download <span class="terminal">install57.fs</span> from <a href="http://www.openbsd.org/ftp.html#http" target="_blank">a mirror</a>.
+</p>
+
+<p>
+I'm using Linux on my laptop and my USB stick is at <span class="terminal">/dev/sdb</span>. Make sure you unmounted the filesystems (eg: <span class="terminal">umount /dev/sdb1</span>, check with <span class="terminal">mount</span> command). Write the image to the stick with <span class="terminal">dd</span>.
+</p>
+
+<p class="terminal">sudo dd if=~/Downloads/install57.fs of=/dev/sdb bs=1M</p>
+
+<p>
+Boot from the stick and install OpenBSD. See <a href="http://www.openbsd.org/faq/faq4.html" target="_blank">the FAQ</a> if you are not familiar with this.
+</p>
+
+<h2>Apply patches</h2>
+
+<p>
+You can't binary upgrade your system to apply security patches (other than upgrading to snapshots which gives you a cutting edge system, not just patches). That sucks if you have to compile stuff on a Soekris i386 with an AMD Geode CPU at 434 MHz.
+</p>
+
+<p>
+You could follow the -stable branch in CVS or apply the patches manually like I do.
+</p>
+
+<p>
+First get the code from tar.gz
+</p>
+
+<p class="terminal">pkg_add -i wget
+
+cd /root
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/ports.tar.gz
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/sys.tar.gz
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/src.tar.gz
+
+cd /usr/src
+tar xzf /root/sys.tar.gz
+tar xzf /root/src.tar.gz
+cd /usr
+tar xzf /root/ports.tar.gz
+
+rm -rf /root/sys.tar.gz /root/src.tar.gz /root/ports.tar.gz</p>
+
+<p>
+Now go to the <a href="http://www.openbsd.org/errata57.html" target="_blank">OpenBSD errata</a> and follow the instructions for every patch file. For example patch 8 for smtpd:
+</p>
+
+<p class="terminal">cd /root
+wget http://ftp.openbsd.org/pub/OpenBSD/patches/5.7/common/008_smtpd.patch.sig
+
+signify -Vep /etc/signify/openbsd-57-base.pub -x 008_smtpd.patch.sig \
+    -m - | (cd /usr/src && patch -p0)
+
+cd /usr/src/usr.sbin/smtpd
+make obj
+make
+make install
+</p>
+
+<p>
+That's it. Every patch has it's own instructions so read carefully.
+</p>

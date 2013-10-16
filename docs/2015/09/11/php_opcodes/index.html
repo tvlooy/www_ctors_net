@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Dumping PHP opcodes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Dumping PHP opcodes">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, php, opcodes, vld, pickle">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Dumping PHP opcodes</h1>
+    <p class="date">
+        php, opcodes, vld, pickle | September 11, 2015
+    </p>
+    <p>
+When parsing PHP files, the Zend Engine generates a series of <a href="http://php.net/manual/en/internals2.opcodes.php" target="_blank">operation codes</a>, execution units commonly known as "opcodes", representing the function of the code. So how do you dump these opcodes?
+</p>
+
+<p>
+PHP has the <a href="https://pecl.php.net/package/vld" target="_blank">Vulcan Logic Disassembler (vld)</a> extension. The vld hooks into the Zend Engine and
+dumps all the opcodes of a script.
+</p>
+
+<h2>Installing vld</h2>
+
+<p>
+<a href="https://github.com/FriendsOfPhp/pickle" target="_blank">Pickle</a> is a new PHP extension installer. It is based on <a href="https://getcomposer.org/" target="_blank">Composer</a> and the plan is to get Composer to fully support it. Very promising! Plus, Pickle fully supports existing <a href="http://pecl.php.net" target="_blank">PECL</a> extensions. The Github repository has a link to the Pickle PHAR file.
+</p>
+
+<p class="terminal">$ sudo pickle.phar install vld
+
+  - Installing vld (latest-stable)
+    Downloading: 100%         
+
++-----------------------------------+--------+
+| Package name                      | vld    |
+| Package version (current release) | 0.13.0 |
+| Package status                    | beta   |
++-----------------------------------+--------+</p>
+
+<p>Next, enable the extension (on Debian based systems):</p>
+
+<p class="terminal">$ echo 'extension=vld.so' | sudo tee /etc/php5/mods-available/vld.ini
+$ sudo php5enmod vld</p>
+
+<h2>Dumping opcodes</h2>
+
+<p>
+I have 2 test PHP files that have the same functionality. Only, one uses an internal PHP function and the other doesn't. Examples:
+</p>
+
+<p class="terminal">$ cat test1.php 
+&lt;?php echo '----------';</p>
+<p class="terminal">$ cat test2.php 
+&lt;?php echo str_repeat('-', 10);</p>
+
+<p>Let's look at the opcodes!</p>
+
+<p class="terminal">$ php -d vld.active=1 -d vld.execute=0 -f test1.php
+
+Finding entry points
+Branch analysis from position: 0
+Jump found. Position 1 = -2
+filename:       /home/tvl/Desktop/test1.php
+function name:  (null)
+number of ops:  2
+compiled vars:  none
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   1     0  E >   ECHO                                                     '----------'
+   2     1      > RETURN                                                   1
+
+branch: #  0; line:     1-    2; sop:     0; eop:     1; out1:  -2
+path #1: 0,</p>
+
+<p class="terminal">$ php -d vld.active=1 -d vld.execute=0 -f test2.php
+
+Finding entry points
+Branch analysis from position: 0
+Jump found. Position 1 = -2
+filename:       /home/tvl/Desktop/test2.php
+function name:  (null)
+number of ops:  5
+compiled vars:  none
+line     #* E I O op                           fetch          ext  return  operands
+-------------------------------------------------------------------------------------
+   1     0  E >   SEND_VAL                                                 '-'
+         1        SEND_VAL                                                 10
+         2        DO_FCALL                                      2  $0      'str_repeat'
+         3        ECHO                                                     $0
+   2     4      > RETURN                                                   1
+
+branch: #  0; line:     1-    2; sop:     0; eop:     4; out1:  -2
+path #1: 0,</p>
+
+<h2>What's next?</h2>
+
+<p>
+Now that you know how to dump opcodes, you can do all kinds of important stuff like, show people why print is slower than echo, or benchmark whether a for loop is faster or slower than a while loop. Or, compare PHP5 with PHP7. The vld extension <a href="https://github.com/gophp7/gophp7-ext/wiki/extensions-catalog" target="_blank">working on PHP7</a>.
+</p>
+
+<p>
+Kidding aside, if you are interested in this subject, I encourage you to read the <a href="http://www.phpinternalsbook.com/" target="_blank">PHP Internals Book</a> and the PHP.net <a href="http://php.net/manual/en/internals2.php" target="_blank">internals documentation</a>.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

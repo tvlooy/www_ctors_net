@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Debugging rewrites on Apache 2.4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Debugging rewrites on Apache 2.4">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Apache 2.4, mod_rewrite, mod_alias">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Debugging rewrites on Apache 2.4</h1>
+    <p class="date">
+        Apache 2.4, mod_rewrite, mod_alias | July 24, 2015
+    </p>
+    <p>
+In Apache 2.4, the <span class="terminal">RewriteLog</span> and <span class="terminal">RewriteLogLevel</span> on mod_rewrite level are replaced by <span class="terminal">LogLevel</span> on core level which you can configure for all modules. See the Apache documentation for detailed information:
+</p>
+
+<ul>
+<li><a href="http://httpd.apache.org/docs/2.4/mod/mod_rewrite.html" target="_blank">mod_rewrite</a>
+<li><a href="http://httpd.apache.org/docs/2.4/mod/mod_alias.html" target="_blank">mod_alias</a>
+<li><a href="http://httpd.apache.org/docs/2.4/mod/core.html#loglevel" target="_blank">loglevel</a>
+</ul>
+
+<p>
+Note that the <span class="terminal">Redirect</span> directive is part mod_alias and not of mod_rewrite. So make sure you are looking for the right logging information. While mod_rewrite offers detailed logging of its actions at the trace1 to trace8 log levels, mod_alias unfortunately does not have this.
+</p>
+
+<p>Enable logging for mod_rewrite and mod_alias:</p>
+
+<p class="terminal">LogLevel alert rewrite:trace3 alias:debug</p>
+
+<p>Note that level trace4 also activates the logging of rewrite conditions.</p>
+
+<h2>mod_rewrite</h2>
+
+<p>
+For a redirect like this:
+</p>
+
+<p class="terminal">RewriteEngine On
+RewriteRule /foo /bar [R=301,L]</p>
+
+<p>
+You will see logging information like this:
+</p>
+
+<p class="terminal">[Fri Jul 24 11:25:21.133477 2015] [rewrite:trace3] [pid 23422:tid 140451352831744] mod_rewrite.c(475): [client ?.?.?.?:53894] my.domain - admin [example.com/sid#7fbd695de898][rid#7fbd693d00a0/initial] [perdir /var/www/] add path info postfix: /var/www/bar -> /var/www/bar/
+
+[Fri Jul 24 11:25:21.133558 2015] [rewrite:trace3] [pid 23422:tid 140451352831744] mod_rewrite.c(475): [client ?.?.?.?:53894] my.domain - admin [example.com/sid#7fbd695de898][rid#7fbd693d00a0/initial] [perdir /var/www/] strip per-dir prefix: /var/www/bar/ -> bar/
+
+[Fri Jul 24 11:25:21.133569 2015] [rewrite:trace3] [pid 23422:tid 140451352831744] mod_rewrite.c(475): [client ?.?.?.?:53894] my.domain - admin [example.com/sid#7fbd695de898][rid#7fbd693d00a0/initial] [perdir /var/www/] applying pattern '/foo' to uri 'bar/'
+
+[Fri Jul 24 11:25:21.133576 2015] [rewrite:trace1] [pid 23422:tid 140451352831744] mod_rewrite.c(475): [client ?.?.?.?:53894] my.domain - admin example.com/sid#7fbd695de898][rid#7fbd693d00a0/initial] [perdir /var/www/] pass through /var/www/bar</p>
+
+<h2>mod_alias</h2>
+
+<p>
+If you try to do this with mod_alias, even if you enable logging at the highest level, you will see nothing in the logs. Only the usual debug info like for this rewrite:
+</p>
+
+<p class="terminal">Redirect 301 /foo /bar</p>
+
+<p>
+You will see this information:
+</p>
+
+<p class="terminal">[Fri Jul 24 11:12:42.319023 2015] [alias:debug] [pid 19368:tid 140451394795264] mod_alias.c(500): [client ?.?.?.?:53731] AH00675: incomplete redirection target of '/bar/' for URI '/foo/' modified to 'http://example.com/bar/'</p>
+
+<p>
+If the URL is corrected to the redirect below, you will see nothing in the logs. So, you will not be able to debug your redirects from mod_alias. 
+</p>
+
+<p class="terminal">Redirect 301 /foo http://example.com/bar</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

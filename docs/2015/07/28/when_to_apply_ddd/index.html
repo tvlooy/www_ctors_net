@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: When to apply DDD</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="When to apply DDD">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, ddd, strategy, cynefin">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>When to apply DDD</h1>
+    <p class="date">
+        ddd, strategy, cynefin | July 28, 2015
+    </p>
+    <p>
+I think it's hard to explain Domain Driven Design (DDD) to people. This blogpost is my attempt at explaining how you should decide where to choose for the DDD software development approach. In this text I try to make a well grounded, but not too academic argument. 
+</p>
+
+<h2>Strategy vs tactics</h2>
+
+<p>
+It's well known that a lot of DDD presentations talk too much about the tactical / technical side and not enough about the strategical part. A strategy should be applied across the project. Decisions must reach the entire team. If not everyone knows and follows the strategy, it's irrelevant. It will lead to centralized architectures with ivory tower rules that must be applied everywhere.
+</p>
+
+<p>
+Strategy is the part that helps you answer the question "what are we trying to accomplish" and "how are we helping the business win". Often, people confuse strategy and tactics and think the two are interchangeable. They are not. Competitive strategy is about being different. It means deliberately choosing a different set of activities to deliver a unique mix of value.
+</p>
+
+<p>
+You may have trade-offs for how you position your business with customers and competitors. In what area are we seeking to gain competitive advantage? Why are customers choosing our company? What are we doing different? Because, if it doesn't differ, it's not competitive advantage.
+</p>
+
+<h2>Cynefin framework</h2>
+
+<p>
+The subtitle of Eric Evans's blue book is "tackling complexity in the heart of software". So, when is something "complex" enough that we have to go for the DDD approach? After all, DDD is very expensive, it has it's cost expressed in accidental complexity it brings. So, if you are not getting business value out of it, you are just wasting a lot of money.
+</p>
+
+<p>
+Dave Snowden's Cynefin framework is a sense making framework used for domain exploration. It divides the basic systems in four. Obvious, complicated, complex and chaotic. Right in the middle of it is disorder, not knowing which of the domains you are in. That is where you are most of the time. The Cynefin framework can be used in IT design, project management, etc. It recognizes the causal differences between systems and helps people choose the right approach for the right domain.
+</p>
+
+<p>
+To not oversimplify the model, I'm only going to talk about the difference between complicated and complex. I encourage you to watch the video from the resources at the end of this article to get a detailed overview of the Cynefin framework.
+</p>
+
+<h2>Complicated</h2>
+
+<p>
+In the complicated domain, there is a relation between cause and effect. There is a right answer, but it's not self evident. That's why we have to apply an analytical method or call in experts that have expertise in the domain to make the right decisions. There are different legitimate ways of doing things (apply good practice instead of *best* practice).
+</p>
+
+<p>
+A lot of domains where we work in as software developers are complicated. For example e-commerce is a very large domain. A lot of it is complicated, but not complex. People have expertise in the domain, there are a lot of good practices. There is no large competitive advantage, you are not doing things different. There are even off the shelf solutions available.
+</p>
+
+<h2>Complex</h2>
+
+<p>
+In a complex domain on the other hand, there is no causality. The relationship between cause and effect cannot be determined by outcome based targets. Therefore we do safe-fail experiments. If an experiment succeeds we amplify it, if it starts to fail we dampen it. The amplification and dampening strategies should be identified in advance. What comes out of this is emergent practice, a new way of doing things, different and unique.
+</p>
+
+<p>
+Some places of your domain have huge competitive advantage. This is where you want to improve the language. These are the parts that you have to understand. This is where you want to apply DDD. If a domain is large but easy to model, it will be easy to model for your competitor as well. It's not worth your time to use DDD because the return on investment is too low. Just rewrite it or buy a different solution in a few years (buy expertise).
+</p>
+
+<p>
+The value of DDD has nothing to do with code, entities, value objects, ... Instead, it formalizes the model and the way people talk about problems. A conceptual model will live for a long time. The model must allow for evolution, you must be ready for change. The model has to emerge and can't be set in stone.
+</p>
+
+<p>
+A complex domain lacks predictability. Mathias Verraes once said: "Planning software development is hard because the code *is* the plan." In a complex domain, executing the code is executing the plan. So, don't plan the plan but make sure you define your amplification and dampening strategies.
+</p>
+
+<h2>Conclusion</h2>
+
+<p>
+Don't build a domain model for everything. Don't build an object model and name it DDD. Domains are behavioural and not data based. Domains live in a context. So apply strategical design and choose the right approach for each context.
+</p>
+
+<p>
+In the Cynefin context, DDD helps you find the link between cause and effect, by doing fail safe experiments. DDD is a way to gain expertise in a complex domain.
+</p>
+
+<h2>References</h2>
+
+<ul>
+  <li><a href="https://www.youtube.com/watch?v=KXqrBySgX-s" target="_blank">CQRS/DDD by Greg Young</a>
+  <li><a href="https://www.youtube.com/watch?v=N7oz366X0-8" target="_blank">The Cynefin Framework by Dave Snowden</a>
+  <li><a href="http://www.amazon.com/exec/obidos/ASIN/0321125215/domainlanguag-20" target="_blank">Domain-Driven Design (blue book) by Eric Evans</a>
+</ul>
+
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

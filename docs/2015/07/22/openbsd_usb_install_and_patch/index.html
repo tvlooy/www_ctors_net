@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Install OpenBSD from USB and apply patches</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Install OpenBSD from USB and apply patches">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, openbsd">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Install OpenBSD from USB and apply patches</h1>
+    <p class="date">
+        openbsd | July 22, 2015
+    </p>
+    <h2>Create USB installer</h2>
+
+<p>
+This are instructions for OpenBSD 5.7. First download <span class="terminal">install57.fs</span> from <a href="http://www.openbsd.org/ftp.html#http" target="_blank">a mirror</a>.
+</p>
+
+<p>
+I'm using Linux on my laptop and my USB stick is at <span class="terminal">/dev/sdb</span>. Make sure you unmounted the filesystems (eg: <span class="terminal">umount /dev/sdb1</span>, check with <span class="terminal">mount</span> command). Write the image to the stick with <span class="terminal">dd</span>.
+</p>
+
+<p class="terminal">sudo dd if=~/Downloads/install57.fs of=/dev/sdb bs=1M</p>
+
+<p>
+Boot from the stick and install OpenBSD. See <a href="http://www.openbsd.org/faq/faq4.html" target="_blank">the FAQ</a> if you are not familiar with this.
+</p>
+
+<h2>Apply patches</h2>
+
+<p>
+You can't binary upgrade your system to apply security patches (other than upgrading to snapshots which gives you a cutting edge system, not just patches). That sucks if you have to compile stuff on a Soekris i386 with an AMD Geode CPU at 434 MHz.
+</p>
+
+<p>
+You could follow the -stable branch in CVS or apply the patches manually like I do.
+</p>
+
+<p>
+First get the code from tar.gz
+</p>
+
+<p class="terminal">pkg_add -i wget
+
+cd /root
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/ports.tar.gz
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/sys.tar.gz
+wget http://ftp5.eu.openbsd.org/ftp/pub/OpenBSD/5.7/src.tar.gz
+
+cd /usr/src
+tar xzf /root/sys.tar.gz
+tar xzf /root/src.tar.gz
+cd /usr
+tar xzf /root/ports.tar.gz
+
+rm -rf /root/sys.tar.gz /root/src.tar.gz /root/ports.tar.gz</p>
+
+<p>
+Now go to the <a href="http://www.openbsd.org/errata57.html" target="_blank">OpenBSD errata</a> and follow the instructions for every patch file. For example patch 8 for smtpd:
+</p>
+
+<p class="terminal">cd /root
+wget http://ftp.openbsd.org/pub/OpenBSD/patches/5.7/common/008_smtpd.patch.sig
+
+signify -Vep /etc/signify/openbsd-57-base.pub -x 008_smtpd.patch.sig \
+    -m - | (cd /usr/src && patch -p0)
+
+cd /usr/src/usr.sbin/smtpd
+make obj
+make
+make install
+</p>
+
+<p>
+That's it. Every patch has it's own instructions so read carefully.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

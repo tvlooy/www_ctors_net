@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Keeping Time with NTP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Keeping Time with NTP">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, IBM i, Linux, Windows">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Keeping Time with NTP</h1>
+    <p class="date">
+        IBM i, Linux, Windows | June 25, 2011
+    </p>
+    <p>
+This article was published at <a href="http://www.itjungle.com/fhg/fhg062508-story01.html" target="_blank">IT Jungle</a>.
+</p>
+
+<p>
+The Network Time Protocol (NTP) is a protocol for synchronizing the clocks of computer systems over packet-switched, variable-latency data networks. NTP uses UDP port 123 as its transport layer. It is designed particularly to resist the effects of variable latency (jitter buffer).
+</p>
+
+<p>
+The Network Time Protocol (NTP) version 3 is described in <a href="http://www.ietf.org/rfc/rfc1305.txt" target="_blank">RFC1305</a> and the Simple Network Time Protocol (SNTP) version 4 is described in <a href="http://www.ietf.org/rfc/rfc2030.txt" target="_blank">RFC2030</a>. NTP is not related to the much simpler daytime <a href="http://www.ietf.org/rfc/rfc867.txt" target="_blank">RFC867</a> and time <a href="http://www.ietf.org/rfc/rfc868.txt" target="_blank">RFC868</a> protocols.
+</p>
+
+<h2>NTP client/server on i5/OS</h2>
+
+<p>
+You can validate the current time with the command <span class="terminal">DSPSYSVAL QDATETIME</span>. The NTP server on the system will redistribute the time shown there. Setting up an NTP client and server is simple; use the <span class="terminal">CHGNTPA</span> (Change SNTP Attributes) command. i5/OS implements the SNTP protocol.
+</p>
+
+<p>
+The "remote system" parameter for the NTP client must be set to one or more servers, or to a server pool. I usually set this parameter to pool.ntp.org on my local NTP server. Local clients have the hostname of my local NTP server configured there. If you want to run the client, set Client autostart to *YES. If you want to run the server as well, set Server autostart to *YES. There is a nice parameter, Synchronization required, that restricts the server to serve time when the client is out of sync. Last, you can set the client and server logging level with the Client activity log and Server activity log parameters. Activate the configured values with an IPL or the following command:
+</p>
+
+<p class="terminal">STRTCPSVR SERVER(*NTP) NTPSRV(*CFGFILE)</p>
+
+<p>
+To stop the NTP client and server, use this command:
+</p>
+
+<p class="terminal">ENDTCPSVR SERVER(*NTP)</p>
+
+<p>
+Depending on the configured logging level, your logs will be more or less verbose. Use the following command to find these logs on the IFS:
+</p>
+
+<p class="terminal">WRKLNK '/QIBM/USERDATA/OS400/TCPIP/NTP'</p>
+
+<p>
+Here's an example of the client with <span class="terminal">ACTLOG(*POLL)</span>:
+</p>
+
+<p class="terminal">SNTP Client Activity Log QTOTNTP/QNTP/002415  02/05/08 22:25:54.306
+TCP9136 SNTP Client started.
+TCP9146 Using time server pool.ntp.org.
+TCP9146 Using time server pool.ntp.org.
+TCP9162 02/05/08 22:25:55.174 Time remaining for adjustment is 0.000 seconds.
+TCP9116 02/05/08 22:25:55.174 NTP server UTC time is 02/05/08 20:25:55.213.
+TCP9117 02/05/08 22:25:55.174 Client clock UTC time is 02/05/08 20:25:55.174.
+TCP9120 02/05/08 22:25:55.174 Client clock adjusted = 1 (0 = not adjusted, 1 = adjusted)</p>
+
+<p>
+An example of the server with <span class="terminal">SRVACTLOG(*ALL)</span>:
+</p>
+
+<p class="terminal">SNTP Server Activity Log QTOTNTP/QNTP/020258  03/05/08 12:44:53.906
+TCP9159 SNTP Server started.
+TCP9161 03/05/08 15:35:52.048 Client 10.1.2.30, Unsynchronized status returned.
+TCP9162 03/05/08 15:35:52.048 Time remaining for adjustment is 0.000 seconds.
+TCP9161 03/05/08 15:37:02.973 Client 10.10.1.35, Unsynchronized status returned.
+TCP9162 03/05/08 15:37:02.973 Time remaining for adjustment is 0.000 seconds.</p>
+
+<p>
+As you would expect, you can view the NTP jobs from a CL command line:
+</p>
+
+<p class="terminal">WRKUSRJOB USER(QNTP)</p>
+
+<h2>NTP client on the HMC</h2>
+
+<p>
+The Hardware Management Console (HMC) is actually just a stripped down Linux box, and can be configured on a restricted shell. You can access the shell locally from the window manager (fluxbox) menu, or remotely with SSH (if you set it up). The current time can be printed with the <span class="terminal">date</span> command.
+</p>
+
+<p>
+NTP is configured in the files /etc/sysconfig/xntp and /etc/ntp.conf. Luckily, there are some commands available that form an interface over these configuration files, namely <span class="terminal">chhmc</span> and <span class="terminal">lshmc</span>. The system has manual (man) pages available for these commands. Use them if you want to know the exact scope of a command used below. The NTP client used on the HMC is the implementation of ntp.org, packaged by S.u.S.E. (now Novell). The x in xntp was intended as experimental, but after a decade of code it was a bit inappropriate so they dropped it for NTPv4. So in practice, xntp refers to an implementation of version three.
+</p>
+
+<p>
+To show if the client is running, use the command <span class="terminal">lshmc -r -F xntp</span>. The system will respond with enable or disable.
+</p>
+
+<p>
+The HMC is protected by a firewall. If you want to use the NTP server on your network, you have to open up the port used by NTP on the correct network interface. The HMC usually has three interfaces (eth0, eth1 and eth2). From within WebSM, you can look up which interface will be used by NTP (the one that's connected to the local network). Try to ping your local NTP server over this interface to be sure you are configuring the correct one. For example if the interface is eth2 and the IP address of the NTP server is 10.10.1.34: <span class="terminal">ping -I eth2 10.10.1.34</span>
+</p>
+
+<p>
+Now you can configure the NTP client with the chhmc command: <span class="terminal">chhmc -c xntp -s add -a 10.10.1.34 -i eth2</span>. The -s flag also accepts remove instead of add to remove a server. There is also a -h flag that accepts a hostname instead of an IP address. You only have to specify -h or -a, not both of them. It's possible to validate configuration changes directly in the already mentioned configuration files.
+</p>
+
+<p>
+The last step is to enable the NTP client. This can be done with the command <span class="terminal">chhmc -c xntp -s enable</span>. The server logs will show the client startup, an example of <span class="terminal">grep ntp /var/log/messages</span>:
+</p>
+
+<p class="terminal">May 02 09:37:21 hmc1 ntpdate[15903]: adjust time server 10.10.1.34 offset 0.071392 sec
+May 02 09:37:21 hmc1 ntpd[15912]: ntpd 4.2.0a@1.1213-r Fri May 02 13:44:28 UTC 2006 (1)
+May 02 09:37:21 hmc1 ntpd[15912]: precision = 3.000 usec
+May 02 09:37:21 hmc1 ntpd[15912]: Listening on interface wildcard, 0.0.0.0#123
+May 02 09:37:21 hmc1 ntpd[15912]: Listening on interface lo, 127.0.0.1#123
+May 02 09:37:21 hmc1 ntpd[15912]: Listening on interface eth0, 9.6.24.1#123
+May 02 09:37:21 hmc1 ntpd[15912]: Listening on interface eth2, 10.10.1.33#123
+May 02 09:37:21 hmc1 ntpd[15912]: Listening on interface sl0, 10.253.0.1#123
+May 02 09:37:21 hmc1 ntpd[15912]: kernel time sync status 0040
+May 02 09:37:21 hmc1 ntpd[15912]: frequency initialized 2.643 PPM
+from /var/lib/ntp/drift/ntp.drift</p>
+
+<p>
+As far as I know, it is impossible to run an NTP server on the HMC.
+</p>
+
+<h2>NTP Client on Windows</h2>
+
+<p>
+Windows also has an implementation of the SNTP protocol. It is possible to configure the client from the Windows GUI using the date and time properties. I was told it's easy to configure the NTP server for all clients on your network using active directory. As I don't use active directory, I added a command to my Samba login script, namely
+<span class="terminal">net time /SETSNTP:ntp1.example.com,0x1</span></p>
+
+<p>
+You can also push the server into the registry with the command:
+</p>
+
+<p class="terminal">reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\DateTime\Servers" /v 0 /t REG_SZ /d ntp1.example.com /f</p>
+
+<p>
+To verify that you are using the correct time server, use the command <span class="terminal">net time /querysntp</span>. To manually resync with the server, use the command <span class="terminal">w32tm /resync</span>. There are a handful of other w32tm commands, but I've never needed them.
+</p>
+
+<p>
+The clients on my network all make use of the dynamic host configuration protocol (DHCP). DHCP is defined in <a href="http://www.ietf.org/rfc/rfc2131.txt" target="_blank">RFC2131</a> and can make use of DHCP options, defined in <a href="http://www.ietf.org/rfc/rfc1533.txt" target="_blank">RFC1533</a>. There is an option 42, which sends network time protocol servers . Because DHCP supports sending NTP servers, I tried to configure this on my Windows client. The client does not request option 42 by default. On NT4 you could add this option to the registry:
+</p>
+
+<p class="terminal">HKLM\SYSTEM\CurrentControlSet\Services\Dhcp\Parameters\Options</p>
+
+<p>
+But, on XP this doesn't seem to work anymore.
+</p>
+
+<h2>NTP Client on *nix</h2>
+
+<p>
+Manually setting up a NTP server/client on Linux/*BSD is a matter of configuring /etc/ntpd.conf. Some distributions, such as OpenSUSE, will make this even easier by providing a graphical frontend on the configuration files (YaST).
+</p>
+
+<p>
+But, I also tried to use the DHCP option with the ISC DHCP client, which many Linux distributions use. All you need to do is add a request for ntp-servers to the /etc/dhclient.conf and extend the dhclient-script with the function below. Call it somewhere in BOUND|RENEW|REBIND|REBOOT. I only do so on $reason REBOOT:
+</p>
+
+<p class="terminal">add_new_ntp() {
+  if [ -n "$new_ntp_servers" ]; then
+    perl -i -ne 'print unless /^server/' /etc/ntpd.conf
+    for address in $new_ntp_servers; do
+      echo "server" $address >> /etc/ntpd.conf
+    done
+    pkill -KILL ntpd && ntpd
+  fi
+}</p>
+
+<p>
+In this case I used OpenBSD and its NTP client, so configuring ntpd.conf and restarting ntpd can be a bit different on a Linux distribution using the client of ntp.org. Here's a piece of tcpdump output showing the REQ/ACK of option 42(look for NTP):
+</p>
+
+<p class="terminal">15:51:15.261777 192.168.1.79.bootpc > 255.255.255.255.bootps:
+xid:0xdc015522 vend-rfc1048 HN:"glenda" RQ:192.168.1.79
+DHCP:REQUEST PR:SM+BR+DG+DN+NS+HN+NTP [tos 0x10]</p>
+
+<p class="terminal">15:51:15.501148 192.168.1.1.bootps > 192.168.1.79.bootpc:
+xid:0xdc015522 Y:192.168.1.79 S:192.168.1.1 vend-rfc1048 DHCP:ACK
+SID:192.168.1.1 LT:43200 SM:255.255.255.0 BR:192.168.1.255
+DG:192.168.1.1 DN:"example.com" NS:ns1.example.com
+NTP:192.168.1.3 [tos 0x10]</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

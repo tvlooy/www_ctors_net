@@ -1,0 +1,37 @@
+<!--
+creation_date: 2011-06-11
+permalink: keeping_5250_alive
+title: Keeping 5250 Alive
+keywords: IBM i
+-->
+<p>
+This article was published at <a href="http://www.itjungle.com/fhg/fhg061108-story01.html" target="_blank">IT Jungle</a>.
+</p>
+
+<p>
+Some time ago, we had problems with 5250 Client Access sessions being reset. It seemed that these connections were travelling over a VPN that got disconnected after being idle for a while. Because we were not in charge of the VPN, I used TCP keepalive as a workaround for this problem.
+</p>
+
+<h2>Keepalive</h2>
+
+<p>
+A TCP connection can set the <span class="terminal">SO_KEEPALIVE</span> option with the setsockopts() system call. When the TCP connection is idle for a specified period of time, a keepalive packet will be sent to keep the connection open. (In practice, this keepalive packet is a request for acknowledgement of the previous packet.) Most programming languages provide a library routine to activate the keepalive option. For example, Java provides the setKeepAlive() method, which can be invoked after socket construction.
+</p>
+
+<p>
+There are three parameters that can be configured for keepalive messages. On a Windows machine, these are registry values in HKLM\SYSTEM\CurrentControlSet\Services\TcpIp\Parameters. <span class="terminal">KeepAliveInterval</span> (default 1 second), <span class="terminal">KeepAliveTime</span> (default 2 hours) and <span class="terminal">TcpMaxDataRetransmission</span> (default 5 seconds). On a Linux machine these are sysctl values in net.ipv4 (or procfs in /proc/sys/net/ipv4), <span class="terminal">tcp_keepalive_intvl</span> (default 75s), <span class="terminal">tcp_keepalive_time</span> (default 2h), and <span class="terminal">tcp_keepalive_probes</span> (default 9).
+</p>
+
+<p>
+TCP keepalive messages are described in <a href="http://www.ietf.org/rfc/rfc1122.txt" target="_blank">RFC1122</a>. The RFC also points out some disadvantages of sending keepalive messages.
+</p>
+
+<h2>5250 Keepalive</h2>
+
+<p>
+It is possible to activate keepalive messages on the 5250 emulator. The startup file for a System i connection (.WS file) must be edited with a text editor. These files reside by default in C:\Program Files\IBM\Client Access\Emulator\Private. Below the [Telnet5250] option you add the option <span class="terminal">KeepAlive=Y</span>. This is enough to activate keepalive messages on a 5250 session.
+</p>
+
+<p>
+The IBM Client Access suite delivers a command line tool, CWBCOPWR, that can configure some of the keepalive parameters. For example, to set KeepAliveTime to 10 seconds and KeepAliveInterval to 1 second, use the command <span class="terminal">cwbcopwr/MKA:1,10</span>.
+</p>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Symfony Live 2012 Berlin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Symfony Live 2012 Berlin">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Symfony Live">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Symfony Live 2012 Berlin</h1>
+    <p class="date">
+        Symfony Live | November 28, 2012
+    </p>
+    <p>
+<img src="/img/post/berlijn_2012.jpg" alt="developers" style="float: left; margin-right: 15px;">
+</p>
+
+<p>
+Dit artikel is geschreven voor Intracto en verscheen voor het eerst op de <a href="http://www.intracto.com/blog/symfony-live-2012-berlin" target="_blank">Intracto blog</a> op November 28, 2012.
+</p>
+
+<p>
+Voor de eerste maal werd er in Berlijn een <a href="http://berlin2012.live.symfony.com/en/index.html" target="_blank">Symfony Live</a> georganiseerd. Er werd voor een aantrekkelijk programma gezorgd dat gewoonweg om onze aanwezigheid schreeuwde. Een week later kunnen we met zekerheid zeggen dat het meer dan de moeite waard was! Een overzicht van onze belevenissen op 22 en 23 november in Berlijn.
+</p>
+
+<h2>Profiling</h2>
+
+<p>
+De eerste dag werd gestart met een overzicht van profiling tools. Aan de hand van enkele cases, waaronder een belangrijk e-commerce platform, kregen deze tools een uitgebreide bespreking. Profiling is echter complex. In een aparte, toekomstige blogpost mag je dus verdere uitdieping verwachten.
+</p>
+
+<p>
+Er kwamen meer dan alleen de traditionele tools (xdebug, xhprof, apache bench, jmeter, mysqltop, ...) aan bod. Er werd onder meer ook gesproken over caching solutions en MySQL storage engines. Maar ook met tools als sysprof, perf en valgrid gingen we een stapje verder en bekeken we het systeem tot op niveau van de Linux kernel.
+</p>
+
+<h2>Composer</h2>
+
+<p>
+Composer is een dependency manager voor PHP projecten. Lees: je kan hiermee de libraries, waar je PHP project afhankelijk is, definiëren en installeren. Ook Symfony2 gebruikt sinds versie 2.1 standaard Composer voor het beheren van afhankelijkheden.
+</p>
+
+<p>
+Nils Adermann, gekend van het populaire PhpBB forum, is nu ook actief in het Composer project. Hij kwam ons de mogelijkheden van Composer toelichten. Zo kwam onder andere het gebruik van private repositories via Satis aan bod. Ook de mogelijkheden van zowel de Composer json en lock file werden uitgebreid toegelicht.
+</p>
+
+<h2>Big Data</h2>
+
+<p>
+David Zülke bracht ons up to date met de laatste ontwikkelingen op het vlak van Apache Hadoop en big data in de PHP wereld. Als je David nog nooit hebt zien spreken kan ik hem alleen maar sterk aanbevelen. ("People use Google to google, except those using Bing. They use Bing to google.")
+</p>
+
+<p>
+Big data is een interessant probleem dat we in de toekomst vaker en vaker zullen moeten oplossen. Dat het logo van Hadoop ook een olifant is, vinden we als PHP-ers mooi meegenomen.
+</p>
+
+<p>
+Naar data collection toe is StatsD zeker het apart vernoemen waard. Met StatsD kan je namelijk counter of times values verzamelen over UDP. Je kan hier eender wat mee gaan verzamelen.  Drupal heeft bijvoorbeeld een module die gegevens zoals watchdog, user logins en performance metrics naar StatsD stuurt.
+</p>
+
+<h2>eZPublish & Legacy Projects</h2>
+
+<p>
+eZ Publish is een CMS dat net zoals Drupal en vele anderen besloten heeft om in zijn core over te schakelen naar Symfony2 componenten. eZ Publish gaat hier vrij ver mee en zit momenteel full stack op Symfony2. Ook een andere presentatie over modernisering van legacy PHP applicaties, gebruik makende van Symfony2, was hier een mooie aanvulling op.
+</p>
+
+<h2>Doctrine</h2>
+
+<p>
+Bij de release van Symfony 2.0.0 werd Doctrine2 2.1 als ORM meegeleverd. Ondertussen werkt men aan 2.4 van het project en er werden over de releases heen een aantal interessante features toegevoegd.
+</p>
+
+<p>
+Enkele nieuwe features:
+</p>
+
+<ul>
+  <li>Een collections criteria API (denk aan Microsoft's LINQ).
+  <li>Een Paginator in core opgenomen zodat we niet langer op zoek moeten naar een externe component.
+  <li>Er kan nu gebruik gemaakt worden van custom ID generators.
+  <li>Arbitrary joins zijn nu ook mogelijk waardoor mapping informatie in sommige gevallen vereenvoudigd kan worden.
+</ul>
+
+<p>
+Dit zijn maar een paar zaken die we in versie 2.3 hebben gekregen. Bovendien zitten er voor versie 2.4 ook veelbelovende features in de pipeline. Dit bewijst dat Doctrine2 een actief project is dat nog lang niet van ophouden weet.
+</p>
+
+<h2>Components, Components, Components!</h2>
+
+<p>
+Hugo Hamon van SensioLabs Paris is de Symfony2 Serializer component komen toelichten. Je kan meer met deze component dat de meesten aanvankelijk gedacht hadden. Als uitbreiding kan je de JMSSerializerBundle gebruiken die hier op verder bouwt. Vooral voor het bouwen van webservices en API's is de JMSSerializerBundle een zeer waardevol element.
+</p>
+
+<p>
+Ook zijn de Symfony2 security component en veel van de AOP functionaliteiten in Symfony2 van de hand van Johannes Schmitt (JMS). De security component is zeer flexibel, maar net hierdoor ook vrij complex. Gelukkig zijn er momenten als Symfony Live waar de developers zelf de architectuur kunnen toelichten, waardoor het voor ons meteen een pak duidelijker wordt.
+</p>
+
+<h2>Conclusie</h2>
+
+<p>
+Dit waren voor ons de hoogtepunten van Symfony Live 2012 Berlin. Een dikke proficiat aan de organisatie om alles vlot te laten verlopen. Hopelijk komt er volgend jaar een 2de editie en kan de Symfony community ook via Symfony Live Berlin blijven groeien.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

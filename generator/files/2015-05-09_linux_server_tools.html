@@ -1,0 +1,96 @@
+<!--
+creation_date: 2015-05-09
+permalink: linux_server_tools
+title: Linux server tools
+keywords: linux, lamp
+-->
+<p>
+    What tools do you install by default on your LAMP (and variants) server? These are mine.
+</p>
+
+<h2>aptitude</h2>
+<p>
+  Aptitude is an ncurses interface on the Debian packages manager. I use it all the time. If you are on Ubuntu, aptitude is not installed by default anymore.
+</p>
+
+<h2>vim</h2>
+<p>
+  Vim is an editor. I set it as the system default editor so everything works with vim. Eg: <span class="terminal">crontab -e</span>, <span class="terminal">visudo</span>, ...
+</p>
+<p>
+Did you ever edited a file as regular user and couldn't save it because only root has write permissions? If you use vim, use this trick to save the file: <span class="terminal">:w ! sudo tee %</span>.
+</p>
+
+<h2>tmux</h2>
+<p>
+  Tmux is a terminal multiplexer. If you need to run a conversion script, want to alter you database, ... you don't want it to fail because your network connection is lost. Sometimes you just want to go home and not wait for these things to finish. Just fire up tmux and start your programs there.
+</p>
+<p>
+  If lose your network, just log in again and run <span class="terminal">tmux attach</span> to get your session back. Want to go home? Just close your window or, in a more clean way, detach the connection with <span class="terminal">ctrl+b d</span> and go home.
+</p>
+<p>
+  Tmux can split the screen into panes horizontally and vertically, multiple times. It can rotate between pane layouts, and can have multiple windows with other panes. You can also run multiple screen sessions at once.  
+</p>
+
+<h2>htop</h2>
+<p>
+  Htop is an ncurses based process viewer.
+  It's something you would use instead of top.
+</p>
+
+<h2>zip unzip</h2>
+<p>
+  Not all things are zipped with gzip or bzip2.
+  Zip and unzip are two separate packages to work with .zip files.
+</p>
+
+<h2>tree</h2>
+<p>
+  Shows directory listings in a tree structure. Where is waldo?
+</p>
+<p class="terminal">$ tree test
+test
+├── bar
+│   ├── quux
+│   └── willy
+├── baz
+│   ├── quux
+│   ├── waldo
+│   └── willy
+└── foo
+    ├── quux
+    └── willy</p>
+
+<h2>curl</h2>
+<p>
+  Curl is not installed by default on some systems. It's useful as a debug tool to transfer data to and from a server. Often used with, but not limited to, HTTP. 
+</p>
+
+<h2>tcpdump</h2>
+<p>
+  Tcpdump is network sniffer. Most of the time I use it to write raw packets to a file (option <span class="terminal">-w</span>) and read that file with Wireshark on a machine that has X installed.
+</p>
+
+<h2>percona-toolkit</h2>
+<p>
+  If you are using MySQL or a fork (MariaDB, Percona) you will appreciate the Percona toolkit. It has a bunch of interesting tools like pt-summary, pt-mext, pt-index-usage, pt-query-adviser and my all time favourite pt-query-digest. 
+</p>
+
+<h2>strace</h2>
+<p>
+  Strace lets you trace system calls and signals. You can start a program by running <span class="terminal">strace program</span> or attach strace to a running process with <span class="terminal">strace -p 1234</span> where 1234 would be the process id of the program of course.
+</p>
+
+<h2>gdb</h2>
+<p>
+  Gdb is the GNU debugger. Can be useful to attach gdb to a running process and get a backtrace of where the process is stuck in the code. <span class="terminal">gdb -p 1234</span> and use command <span class="terminal">bt</span>. 
+</p>
+
+<h2>Performance</h2>
+<p>
+  There is a bunch of other tools that you can install to investigate performance problems. I usually install these ad hoc. You should look at Brendan Gregg's <a href="http://www.brendangregg.com/Perf/linux_observability_tools.png">Linux observability tools diagram</a> for a good overview of these. Eg: sysdig is very interesting one.
+</p>
+
+<p>
+  So, what tools am I missing?
+</p>

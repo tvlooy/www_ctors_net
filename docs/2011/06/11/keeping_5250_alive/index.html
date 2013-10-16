@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Keeping 5250 Alive</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Keeping 5250 Alive">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, IBM i">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Keeping 5250 Alive</h1>
+    <p class="date">
+        IBM i | June 11, 2011
+    </p>
+    <p>
+This article was published at <a href="http://www.itjungle.com/fhg/fhg061108-story01.html" target="_blank">IT Jungle</a>.
+</p>
+
+<p>
+Some time ago, we had problems with 5250 Client Access sessions being reset. It seemed that these connections were travelling over a VPN that got disconnected after being idle for a while. Because we were not in charge of the VPN, I used TCP keepalive as a workaround for this problem.
+</p>
+
+<h2>Keepalive</h2>
+
+<p>
+A TCP connection can set the <span class="terminal">SO_KEEPALIVE</span> option with the setsockopts() system call. When the TCP connection is idle for a specified period of time, a keepalive packet will be sent to keep the connection open. (In practice, this keepalive packet is a request for acknowledgement of the previous packet.) Most programming languages provide a library routine to activate the keepalive option. For example, Java provides the setKeepAlive() method, which can be invoked after socket construction.
+</p>
+
+<p>
+There are three parameters that can be configured for keepalive messages. On a Windows machine, these are registry values in HKLM\SYSTEM\CurrentControlSet\Services\TcpIp\Parameters. <span class="terminal">KeepAliveInterval</span> (default 1 second), <span class="terminal">KeepAliveTime</span> (default 2 hours) and <span class="terminal">TcpMaxDataRetransmission</span> (default 5 seconds). On a Linux machine these are sysctl values in net.ipv4 (or procfs in /proc/sys/net/ipv4), <span class="terminal">tcp_keepalive_intvl</span> (default 75s), <span class="terminal">tcp_keepalive_time</span> (default 2h), and <span class="terminal">tcp_keepalive_probes</span> (default 9).
+</p>
+
+<p>
+TCP keepalive messages are described in <a href="http://www.ietf.org/rfc/rfc1122.txt" target="_blank">RFC1122</a>. The RFC also points out some disadvantages of sending keepalive messages.
+</p>
+
+<h2>5250 Keepalive</h2>
+
+<p>
+It is possible to activate keepalive messages on the 5250 emulator. The startup file for a System i connection (.WS file) must be edited with a text editor. These files reside by default in C:\Program Files\IBM\Client Access\Emulator\Private. Below the [Telnet5250] option you add the option <span class="terminal">KeepAlive=Y</span>. This is enough to activate keepalive messages on a 5250 session.
+</p>
+
+<p>
+The IBM Client Access suite delivers a command line tool, CWBCOPWR, that can configure some of the keepalive parameters. For example, to set KeepAliveTime to 10 seconds and KeepAliveInterval to 1 second, use the command <span class="terminal">cwbcopwr/MKA:1,10</span>.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

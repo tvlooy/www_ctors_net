@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Releasing File Member Locks With QSH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Releasing File Member Locks With QSH">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, IBM i">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Releasing File Member Locks With QSH</h1>
+    <p class="date">
+        IBM i | April 22, 2011
+    </p>
+    <p>
+This article was published at <a href="http://www.itjungle.com/fhg/fhg042209-story02.html" target="_blank">IT Jungle</a>.
+</p>
+
+<p>
+Sometimes our users just keep their sessions open when they go home. At times, such as when we need to install software updates, this is a problem.
+</p>
+
+<p>
+It is possible to write a CL that cleans up the file/member locks without getting too complicated? You'll be happy to know it is. Unix to the rescue! All you need is to quickly hack together a small nine-line QSH shell script to do the job.
+</p>
+
+<p>
+See this example file named unlock that lives in my /home/tvl directory on the IFS:
+</p>
+
+<p class="terminal">for file in $@; do
+  system "WRKOBJLCK OBJ($file) OBJTYPE(*FILE)
+  MBR(*ALL)" 2&gt;/dev/null | grep HELD | cut -c 16-46 &gt; /tmp/.jobs.tmp
+  while read lock; do
+    if [ `echo $lock | wc -c` -gt 1 ]; then
+      system "ENDJOB JOB(`echo $lock | cut -d " " -f 3`/`\
+        echo $lock | cut -d " " -f 2`/`\
+        echo $lock | cut -d " " -f 1`) OPTION(*IMMED) LOGLMT(0)" 2&gt;&amp;1 | \
+        grep -v CPC2206 | grep -v CPC1230
+    fi
+  done &lt; /tmp/.jobs.tmp
+  rm /tmp/.jobs.tmp
+done</p>
+
+<p>
+This script can be called from IBM i with:
+</p>
+
+<p class="terminal">QSH CMD('sh /home/tvl/unlock FILE1 FILE2 FILE3 FILEn')</p>
+
+<p>
+Or, you can feed it the result of a file list:
+</p>
+
+<p class="terminal">QSH CMD('sh /home/tvl/unlock `cat /home/tvl/files`')</p>
+
+<p>
+Or, even feed the result of a DB2/400 SQL query. For example:
+</p>
+
+<p class="terminal">QSH CMD('sh /home/tvl/unlock `db2 "select name from allfiles where changed=1"`')</p>
+
+<p>
+The script will, for every file, first collect jobs that have a file/member lock on the object and output the job details into a temporary file. Next, the script will *IMMED end the job that is holding the lock. The two messages that I am ignoring are:
+</p>
+
+<p class="terminal">CPC2206 - Ownership of object QZSHSYSTEM in QTEMP type *USRSPC changed
+CPC1230 - LOGLMT changed for job</p>
+
+<p>
+Using QSH makes quick system administration jobs easy. No compiling needed, just use the power of a Unix shell.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

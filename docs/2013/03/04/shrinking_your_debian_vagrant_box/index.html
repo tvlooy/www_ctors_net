@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog tvlooy: Shrinking your Debian Vagrant box</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+        <meta name="description" content="Shrinking your Debian Vagrant box">
+    <meta name="keywords" content="Tom Van Looy, tvlooy, ctors.net, Vagrant, Debian">
+
+    <link rel="stylesheet" href="/css/style.css?v=2" type="text/css">
+</head>
+<body>
+<header></header>
+<section>
+    <nav>
+        <img src="/img/tvlooy.jpg" alt="Tom Van Looy" class="tvl">
+        <a href="/blog">Blog</a>
+        <a href="/">About</a>
+    </nav>
+    <article>
+            <div class="title">Blog tvlooy</div>
+    <h1>Shrinking your Debian Vagrant box</h1>
+    <p class="date">
+        Vagrant, Debian | March 04, 2013
+    </p>
+    <p>
+My Vagrant box is just 228M, which I think is very nice. It has:
+</p>
+
+<ul>
+    <li>Debian Squeeze (6.0.7)
+    <li>kernel 2.6.32-5-amd64
+    <li>Guest Additions 4.2.8
+    <li>Puppet 3.1.0
+</ul>
+
+<p>
+How did I get my box this small? I have to thank Dominique Broeglin (dominique.broeglin.fr) and Marius Ducea (ducea.com) for their Debian tips.
+</p>
+
+<p>
+After installing the Guest Additions, you have gcc and kernel headers etc. Remove them all:
+</p>
+
+<p class="terminal">aptitude purge cpp-4.3 gcc-4.3-base
+aptitude purge cpp-4.4 gcc-4.4-base g++-4.4</p>
+
+<p>
+Also remove python stuff:
+</p>
+
+<p class="terminal">aptitude purge python2.6 python2.6-minimal</p>
+
+<p>
+Use the orphaner and debfoster and zap everything:
+</p>
+
+<p class="terminal">orphaner --purge
+debfoster
+apt-get clean</p>
+
+<p>
+Remove things you won't need:
+</p>
+
+<p class="terminal">rm -rf /home/vagrant/.bash_history
+rm -rf /root/.bash_history
+rm -rf /usr/src/vboxguest*
+rm -rf /usr/share/doc
+find /var/cache -type f -exec rm -rf {} \;
+find /var/log -type f | while read f; do echo -ne '' &gt; $f; done;</p>
+
+<p>
+Also let the system clean up all leftovers of removed packages:
+</p>
+
+<p class="terminal">dpkg --list | grep '^rc\b' | awk '{ print $2 }' | xargs sudo dpkg -P</p>
+
+<p>
+Then, tighten things up:
+</p>
+
+<p class="terminal">aptitude install zerofree
+init 1</p>
+
+<p>
+You have to set the root password first, and boot with GUI mode on, because you will have to login in single user mode.
+</p>
+
+<p class="terminal">mount -o remount,ro /dev/sda1
+zerofree /dev/sda1
+halt</p>
+
+<p>
+Then I just package the box:
+</p>
+
+<p class="terminal">vagrant package</p>
+
+<p>
+And it's done.
+</p>
+    </article>
+</section>
+<footer>
+    Copyright &copy; Tom Van Looy 2004 - <?= date('Y') ?>
+</footer>
+</body>
+</html>

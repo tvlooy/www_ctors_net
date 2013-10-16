@@ -1,0 +1,61 @@
+<!--
+creation_date: 2013-12-15
+permalink: symfonycon_2013_hacking_day
+title: SymfonyCon 2013 Hacking Day
+keywords: SymfonyCon, Symfony2
+-->
+<p>
+<img src="/img/post/symfony-docs-badge.png" alt="Symfony docs badge"
+     style="float: left; margin-right: 15px;">
+</p>
+
+<p>
+Last week the first <a href="http://warsaw2013.symfony.com" target="_blank">SymfonyCon</a> took place in Warsaw. Two of my <a href="http://www.intracto.com/" target="_blank">Intracto</a> colleagues (<a href="https://twitter.com/EpochDC" target="_blank">EpochDC</a> and <a href="https://twitter.com/jeroenmoons" target="_blank">jeroenmoons</a>) attended the conference but unfortunately for me, I was out of resources and had to stay home. These two guys will have a lot of talking to do next week ;-). I also can't wait until SensioLabs publishes the recordings.
+</p>
+
+<p>
+A Symfony conference traditionally ends with a Hacking Day. Our friend of the Symfony community <a href="https://twitter.com/cordoval" target="_blank">cordoval</a> was so kind to <a href="http://www.doodle.com/vycrabazihq926yq#table" target="_blank">organize one</a> for this first SymfonyCon.
+</p>
+
+<p class="quote">
+SymfonyCon Hacking Day, Dec 14th 2013<br>
+Poll initiated by Luis Cordova<br>
+Where: Hotel The Westin Warsaw<br>
+&nbsp;<br>
+We are organizing the hacking day and we have the chance to make this day a very rewarding experience for advance and newcomers alike. This Hacking day will be for all the community!<br>
+&nbsp;<br>
+Below please make a choice and which group or repo are you interested in. This will help us see how many people will be there joining each working group. Don't worry if your repo or group does not show. Rather email me at cordoval at gmail dot com to include it quickly.<br>
+&nbsp;<br>
+You can be remote too!
+</p>
+
+<p>
+You can be remote too? Great! There was no reason for me not to attend. This was what I did on the Symfony2 Hacking Day.
+</p>
+
+<p>
+Saturday morning I joined the #symfony and #symfony-docs IRC channels on Freenode and asked how things were going to be done. <a href="https://twitter.com/WouterJNL" target="_blank">WouterJ</a> from the Symfony docs team already wrote a <a href="
+https://gist.github.com/WouterJ/7956723" target="_blank">document</a> with instructions. A list with <a href="http://bit.ly/1dg2S0k" target="_blank">tickets to work on</a> was also available. I like good documentation and there was a lot to do, so I got started with looking at the open PR's.
+</p>
+
+<p>
+I picked two tickets that were related to the Console component. Since 2.3 you can use console events, but the logging cookbook entry was still lacking this information (PR <a href="https://github.com/symfony/symfony-docs/issues/2534" target="_blank">#2534</a>). Also since 2.4 the MonologBundle provides a ConsoleHandler that simplifies the way you can use messages in a command, but this was also not well documented (PR <a href="https://github.com/symfony/symfony-docs/issues/2939" target="_blank">#2939</a>). I learned a lot by looking at the code and discovering new features.
+</p>
+
+<p>
+After some valuable feedback from <a href="https://twitter.com/WouterJNL" target="_blank">WouterJ</a>, <a href="https://twitter.com/xabbuh" target="_blank">xabbuh</a> and <a href="https://twitter.com/Stof70" target="_blank">stof</a> I was able to remove the [WIP] label from my PR's. Now I will have to wait for more feedback and eventually they will probably get merged into the main repository. High five!
+</p>
+
+<p>
+The Symfony2 documentation uses reStructuredText as its markup language and Sphinx for building the output. After hacking on the docs for a while, I was trying to figure out how I could build and test my changes on my local machine. The absolute advantage of a hack day is that IRC is very active. You can just ask your questions and get an answer from someone in no time. Wouter pointed me out to PR <a href="https://github.com/symfony/symfony-docs/issues/3328" target="_blank">#3328</a>, where he tried to link the build to <a href="http://about.travis-ci.org/" target="_blank">Travis CI</a>. That PR helped me to set up the build in under 10 minutes. That's amazing. I created a little <a href="https://github.com/tvlooy/sphinx-for-symfony-docs" target="_blank">helper repository</a> so you can set it up really easy too.
+</p>
+
+<p>
+We kept discussing the PR in question and decided that it could be improved with git sparse checkouts. I honestly didn't think this would work with git, but it seems it does because we now have a new PR that includes this optimization :-)
+</p>
+
+<p><img src="/img/post/wouter_tweet_hackday_2013.png" alt="Hackday results"></p>
+
+<p>
+I had a good time. If you want to see detailed statistics about the Hacking Day, I suggest you read <a href="http://www.craftitonline.com/2013/12/hacking-day-warsaw-symfony-series-part-vii/" target="_blank">cordoval's blogpost</a>. For me personally, hacking days are the perfect moment to get involved. I have a busy schedule and if I finally do make some time to give back to the community I don't want to lose time with getting up to speed or figuring out things I forgot about. I didn't even have time to look at the other repositories, so more of this please!
+</p>

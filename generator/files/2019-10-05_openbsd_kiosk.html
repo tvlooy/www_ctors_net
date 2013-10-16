@@ -1,0 +1,60 @@
+<!--
+creation_date: 2019-10-05
+permalink: openbsd_kiosk
+title: Building an OpenBSD kiosk
+keywords: 
+-->
+<p>
+Install OpenBSD the usual way. Add an extra user named "kiosk" during install.
+</p>
+
+<p>
+Configure doas:
+</p>
+
+<p class="terminal">echo 'permit nopass kiosk' > /etc/doas.conf
+</p>
+
+<p>
+Install Chromium:
+</p>
+
+<p class="terminal">pkg_add -i chromium
+</p>
+
+<p>
+Log in as user kiosk and add the script <span class="terminal">/home/kiosk/chrome.sh</span>. Make this script executable. See below for the content of the script, replace "&lt;your_homepage&gt;" with the homepage you want to show"
+</p>
+
+<p class="terminal">while [ true ]; do
+    /usr/local/bin/chrome --kiosk --no-default-browser-check  --disable-session-crashed-bubble https://&lt;your_homepage&gt;
+done
+</p>
+
+<p>
+Add this line to your <span class="terminal">/home/kiosk/.xinitrc</span>:
+</p>
+
+<p class="terminal">/home/kiosk/chrome.sh &
+exec cwm
+</p>
+
+<p>
+Add this line to your <span class="terminal">/home/kiosk/.profile</span>:
+</p>
+
+<p class="terminal">if [ -z "`pgrep xinit`" ]; then
+    xinit -- -nocursor -nolisten tcp
+fi
+</p>
+
+<p>
+Add this line to your <span class="terminal">/etc/rc.local</span>:
+</p>
+
+<p class="terminal">su - kiosk
+</p>
+
+<p>
+Next, reboot and your kiosk is ready!
+</p>

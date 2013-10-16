@@ -1,0 +1,99 @@
+<!--
+creation_date: 2013-05-14
+permalink: sylius_ecommerce_met_behavior_driven_development
+title: Sylius e-commerce met Behavior Driven Development
+keywords: Symfony2, Sylius, BDD
+-->
+<p>
+Dit artikel is geschreven voor Intracto en verscheen voor het eerst op de <a href="http://www.intracto.com/blog/sylius-e-commerce-met-behavior-driven-development-bdd" target="_blank">Intracto blog</a> op Mei 14, 2013.
+</p>
+
+<p>
+Open source PHP projecten, waar we bij Intracto mee in aanraking komen, maken vaak gebruik van <a href="http://phpunit.de/manual/3.8/en/test-driven-development.html" target="_blank">test-driven development</a> (TDD). Door het schrijven van geautomatiseerde testen, kan je het gedrag van een volledig systeem testen.
+</p>
+
+<p>
+De granulariteit van een test kan zo klein zijn als een unit test en zo groot als een gebruikers acceptatie test. In een unit test kan de kleinst mogelijk testbare eenheid, bv. een PHP functie, binnen de applicatie getest worden. De gebruikers acceptatie test daarentegen baseert zich op user stories die tijdens een analyse fase opgesteld worden.
+</p>
+
+<h2>TDD versus BDD</h2>
+
+<p>
+Bij TDD worden de testen eerst geschreven, nog voor de effectieve functionaliteit uitgewerkt is. Daardoor zal de eerste test mislukken en pas lukken als je de functionaliteit effectief hebt voorzien.
+</p>
+
+<p>
+Nu is er echter een nieuwe vorm van testen populair in de PHP wereld. Namelijk <a href="http://dannorth.net/introducing-bdd/" target="_blank">behavior-driven development</a> (BDD). Deze techniek bouwt verder op TDD, maar vervangt het woord "test" door zaken als "gedrag", "voorbeeld", "scenario", enz.
+</p>
+
+<p>
+Hierdoor sluiten de tests zich dichter aan bij de definitie van het probleem domein door dezelfde <a href="http://martinfowler.com/bliki/UbiquitousLanguage.html" target="_blank">"ubiquitous language"</a> te gebruiken. BDD combineert de algemene technieken en principes van TDD met ideeën uit <a href="http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215" target="_blank">domain-driven design</a> (DDD) en object-georiënteerde analyse en ontwerp.
+</p>
+
+<p>
+Dit is vrij theoretisch, maar wordt al snel duidelijk aan de hand van een paar voorbeelden.
+</p>
+
+<h2>Sylius e-commerce</h2>
+
+<p>
+<a href="http://www.sylius.com/" target="_blank">Sylius</a> is een modern PHP e-commerce platform voor <a href="http://symfony.com/" target="_blank">Symfony2</a>, en werd volledig ontwikkeld aan de hand van BDD. Het project is open-source en wordt commercieel ondersteund door <a href="http://knplabs.com/" target="_blank">KNP Labs</a>. Sylius maakt gebruik van een aantal bundles waar steeds een bepaald onderdeel van ecommerce in ontwikkeld wordt. Zo is er bijvoorbeeld een assortiment bundle, een payments bundle, een shipping bundle, ... Al deze bundles worden aan elkaar gekoppeld in het Sylius ecommerce platform, dat je kan installeren als een volwaardige product.
+</p>
+
+<p><img src="/img/post/sylius_logo_2013.png" alt="Sylius logo"></p>
+
+<p>
+Het platform ontwikkelt zich op dit ogenblik nog zeer snel, maar heeft alle belangrijkste features aan boord om een bruikbaar e-commerce platform te zijn. Zo is er een uitgebreid product en categorie beheer systeem aanwezig, inclusief stock beheer. Er is een shipping engine aanwezig en er werd ondersteuning voor betalingen uitgewerkt, inclusief BTW. Het platform is beschikbaar in meerdere talen, en sinds kort ook in het Nederlands. Het platform is gebouwd op Symfony2 en daardoor makkelijk uitbreidbaar en aanpasbaar door developers. Een voorbeeld van hoe de Sylius backend er uit ziet:
+</p>
+
+<p><img src="/img/post/sylius_dashboard_2013.png" alt="Sylius dashboard"></p>
+
+<h2>SpecBDD</h2>
+
+<p>
+Binnen BDD kan men testen laten baseren op specificaties of op user stories. De Sylius bundles werden ontwikkeld op basis van SpecBDD met de development tool <a href="https://github.com/phpspec/phpspec" target="_blank">phpspec</a>. De techniek bestaat er uit om telkens het gedrag van de objecten te beschrijven vooraleer men deze gaat implementeren. Vervolgens wordt er dan net voldoende code geschreven om aan de specificatie te voldoen. De code kan zodoende veilig gerefactored worden tot een clean design om vervolgens weer verder te gaan met de volgende stap. Deze werkwijze wordt in kleine iteratieve stapjes toegepast tot het gewenste resultaat bekomen is. Een phpspec spec file ziet er bijvoorbeeld uit als de <a href="https://github.com/Sylius/SyliusShippingBundle/blob/master/spec/Sylius/Bundle/ShippingBundle/Model/ShippingMethod.php" target="_blank">ShippingMethod.php</a> uit de SyliusShippingBundle.
+</p>
+
+<p>
+Als we de spec file uitvoeren zien we volgende resultaat:
+</p>
+
+<p><img src="/img/post/phpspec_ok.png" alt="PhpSpec successful run"></p>
+
+<p>
+Als een test zou falen, dan zien we volgende resultaat:
+</p>
+
+<p><img src="/img/post/phpspec_nok.png" alt="PhpSpec run with errors"></p>
+
+<p>
+Soms zal een bepaalde klasse afhankelijkheden hebben op een andere klasse, die mogelijk nog niet bestaan. Bij het unit testen worden de afhankelijkheden steeds vervangen door zogenaamde test doubles. Phpspec maakt hiervoor gebruik van het <a href="https://github.com/phpspec/prophecy" target="_blank">Prophecy</a> object mocking framework. Prophecy voorspelt als het ware hoe objecten zich zullen gedragen.
+</p>
+
+<h2>StoryBDD</h2>
+
+<p>
+Een andere manier van testen met BDD baseert zich op verhalen. Binnen het Sylius e-commerce platform zelf worden op deze manier de user stories getest. De tool die hier voor gebruikt wordt is <a href="http://behat.org/" target="_blank">Behat</a>. Behat leest feature bestanden uit, waar scenario's in beschreven staan. De scenario's worden geschreven in de domein specifieke taal (DSL) genaamd Gherkin. Standaard worden scenario's geschreven in het Engels, maar je kan Gherkin ook in je eigen taal laten werken. Een feature file ziet er bijvoorbeeld uit als de <a href="https://github.com/Sylius/Sylius/blob/master/features/backend/countries.feature" target="_blank">countries.feature</a> uit het Sylius platform.
+</p>
+
+<p>
+Als we de feature file uitvoeren zien we het volgende resultaat:
+</p>
+
+<p><img src="/img/post/behat_ok.png" alt="Behat successful run"></p>
+
+<p>
+Als een test zou falen, dan zien we volgend resultaat:
+</p>
+
+<p><img src="/img/post/behat_nok.png" alt="Behat run with errors"></p>
+
+<p>
+Je kan Behat eigenlijk gebruiken om verschillende soorten applicaties te testen. Command line applicaties, GUI applicaties en zoals het geval bij Sylius ook web applicaties. Behat maakt gebruik van Mink als browser emulatie en abstractie laag om de web tests uit te voeren. Wanneer je applicaties gebruik maken van JavaScript en AJAX, volstaat Mink echter niet om tests uit te voeren, aangezien deze niet in een echte browser draait en geen JavaScript engine aan boord heeft. Behat kan daarvoor gebruik maken van Selenium2, waar wel JavaScript sessies gebruikt kunnen worden. Selenium2 schakelt hiervoor een echte browser in, die je zelf kan kiezen, om echte stappen uit te voeren.
+</p>
+
+<h2>Besluit</h2>
+
+<p>
+Met behavior-driven development kunnen applicaties op een moderne manier getest worden. Het Sylius e-commerce platform is hiervan een mooie testcase. Het goede ontwerp en de kwaliteit van de code tonen aan dat dat phpspec en Behat een grote meerwaarde hebben betekend in de ontwikkeling van het product. Sylius is een e-commerce platform dat zeker potentieel heeft om uit te groeien tot één van de grote PHP e-commerce platformen.
+</p>
