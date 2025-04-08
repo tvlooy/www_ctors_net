@@ -1,14 +1,14 @@
 @font-face {
     font-family: 'Fatboy Slim BLTC BRK';
-    src: url('css/fonts/FatboySlimBLTCBRK.woff2') format('woff2'),
-         url('css/fonts/FatboySlimBLTCBRK.woff') format('woff');
+    src: url('fonts/FatboySlimBLTCBRK.woff2') format('woff2'),
+         url('fonts/FatboySlimBLTCBRK.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
     font-family: 'KumbhSans-Light';
-    src: url('css/fonts/KumbhSans-Light.woff') format('woff');
+    src: url('fonts/KumbhSans-Light.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
