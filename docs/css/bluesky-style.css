@@ -1,0 +1,56 @@
+@font-face {
+    font-family: 'Fatboy Slim BLTC BRK';
+    src: url('css/fonts/FatboySlimBLTCBRK.woff2') format('woff2'),
+         url('css/fonts/FatboySlimBLTCBRK.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'KumbhSans-Light';
+    src: url('css/fonts/KumbhSans-Light.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    margin: 0;
+    background: #48bbed;
+}
+.photo img {
+    border-radius: 50%;
+}
+.logo {
+    height: 430px; /* 270 + 160 */
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+
+    text-align: center;
+    color: #fff;
+}
+.title {
+	font: 3em 'Fatboy Slim BLTC BRK';
+}
+.slogan {
+	font: 1.4em 'KumbhSans-Light';
+}
+.icons {
+    font: 1.2em 'KumbhSans-Light';
+    margin-top: 30px;
+}
+a, a:visited, a:active {
+    color: #fff;
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
