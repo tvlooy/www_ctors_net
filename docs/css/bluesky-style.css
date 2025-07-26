@@ -5,20 +5,18 @@
     font-weight: normal;
     font-style: normal;
 }
-
 @font-face {
     font-family: 'KumbhSans-Light';
     src: url('fonts/KumbhSans-Light.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
-
 html, body {
     height: 100%;
 }
 body {
     margin: 0;
-    background: #48bbed;
+    background: #68C5EC;
 }
 .photo img {
     border-radius: 50%;
@@ -42,10 +40,20 @@ body {
 }
 .slogan {
 	font: 1.4em 'KumbhSans-Light';
+	margin-top:10px;
 }
 .icons {
     font: 1.2em 'KumbhSans-Light';
-    margin-top: 30px;
+    margin-top: 50px;
+}
+.highlight {
+    background: radial-gradient(
+        circle,
+        hsla(198, 77%, 67%, 0.75) 60%,
+        hsla(198, 77%, 67%, 0) 100%
+    );
+    padding: 5px 40px;
+    border-radius: 10px;
 }
 a, a:visited, a:active {
     color: #fff;
@@ -54,3 +62,44 @@ a, a:visited, a:active {
 a:hover {
     text-decoration: underline;
 }
+.cloud {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: -1;
+    pointer-events: none;
+}
+.cloud::before,
+.cloud::after {
+    content: '';
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+}
+@keyframes moveCloud {
+    0% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(50vw) translateY(10px); }
+    100% { transform: translateX(100vw) translateY(0); }
+}
+.cloud::before {
+    width: var(--before-width);
+    height: var(--before-height);
+    top: var(--before-top);
+    left: var(--before-left);
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    content: '';
+}
+.cloud::after {
+    width: var(--after-width);
+    height: var(--after-height);
+    top: var(--after-top);
+    left: var(--after-left);
+    background: #fff;
+    border-radius: 50%;
+    position: absolute;
+    content: '';
+}
+
